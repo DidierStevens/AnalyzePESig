@@ -66,12 +66,12 @@
 
 #define SEP _TEXT(";")
 
-string ListToString(list<string> list1, string separator)
+tstring ListToString(list<tstring> list1, tstring separator)
 {
-	string result = "";
-	list<string>::iterator i;
+	tstring result;
+	list<tstring>::iterator i;
 
-	for (i=list1.begin(); i != list1.end(); i++)
+	for (i = list1.begin(); i != list1.end(); i++)
 		if (i == list1.begin())
 			result = *i;
 		else
@@ -80,10 +80,10 @@ string ListToString(list<string> list1, string separator)
 	return result;
 }
 
-string ListToStringSort(list<string> list1, string separator)
+tstring ListToStringSort(list<tstring> list1, tstring separator)
 {
-	string result = "";
-	list<string>::iterator i;
+	tstring result;
+	list<tstring>::iterator i;
 
 	list1.sort();
 
@@ -96,138 +96,138 @@ string ListToStringSort(list<string> list1, string separator)
 	return result;
 }
 
-string ListIntToString(list<int> list1)
+tstring ListIntToString(list<int> list1)
 {
-	string result = "";
+	tstring result = _T("");
 	list<int>::iterator i;
 	_TCHAR szBuffer[10];
 
 	for (i=list1.begin(); i != list1.end(); i++)
 	{
-		_itoa_s(*i, szBuffer, 10);
+		_itot_s(*i, szBuffer, 10);
 		if (i == list1.begin())
-			result = string(szBuffer);
+			result = szBuffer;
 		else
-			result += "|" + string(szBuffer);
+			result += tstring(_T("|")) + szBuffer;
 	}
 
 	return result;
 }
 
-string ListListToStringSort(list<list<string>> list1)
+tstring ListListToStringSort(list<list<tstring>> list1)
 {
-	string result = "";
-	list<list<string>>::iterator i;
+	tstring result;
+	list<list<tstring>>::iterator i;
 
 	for (i=list1.begin(); i != list1.end(); i++)
 		if (i == list1.begin())
-			result = ListToStringSort(*i, ",");
+			result = ListToStringSort(*i, _T(","));
 		else
-			result += "|" + ListToStringSort(*i, ",");
+			result += _T("|") + ListToStringSort(*i, _T(","));
 
 	return result;
 }
 
-void SearchAndReplace(string& value, string& search, string& replace)
+void SearchAndReplace(tstring& value, tstring search, tstring replace)
 {
-	string::size_type next;
+	tstring::size_type next;
 
-	for (next = value.find(search); next != string::npos; next = value.find(search, next))
+	for (next = value.find(search); next != tstring::npos; next = value.find(search, next))
 	{
 		value.replace(next, search.length(), replace);
 		next += replace.length();
 	}
 }
 
-string XMLElementSingleLine(unsigned int uiIndentation, _TCHAR* element, string& value)
+tstring XMLElementSingleLine(unsigned int uiIndentation, _TCHAR* element, tstring& value)
 {
 	unsigned int uiIter;
-	string space = _TEXT("");
+	tstring space;
 
-	SearchAndReplace(value, string(_TEXT("&")), string(_TEXT("&amp;")));
-	SearchAndReplace(value, string(_TEXT("<")), string(_TEXT("&lt;")));
-	SearchAndReplace(value, string(_TEXT(">")), string(_TEXT("&gt;")));
+	SearchAndReplace(value, _TEXT("&"), _TEXT("&amp;"));
+	SearchAndReplace(value, _TEXT("<"), _TEXT("&lt;"));
+	SearchAndReplace(value, _TEXT(">"), _TEXT("&gt;"));
 	for (uiIter = 0; uiIter < uiIndentation; uiIter++)
 		space += _TEXT(" ");
-	return space + string(_TEXT("<")) + string(element) + string(_TEXT(">")) + value + string(_TEXT("</")) + string(element) + string(_TEXT(">")) ;
+	return space + _TEXT("<") + element + _TEXT(">") + value + _TEXT("</") + element + _TEXT(">");
 }
 
-string DecodeCharacteristics(unsigned int characteristics)
+tstring DecodeCharacteristics(unsigned int characteristics)
 {
-	string result = "";
+	tstring result;
 
 	if (characteristics & 0x2)
-		result += "exec";
+		result += _T("exec");
 	if (characteristics & 0x2000)
 	{
-		if (result != "")
-			result += " ";
-		result += "dll";
+		if (result != _T(""))
+			result += _T(" ");
+		result += _T("dll");
 	}
 	return result;
 }
 
-string DecodeFileAttributes(DWORD fileattributes)
+tstring DecodeFileAttributes(DWORD fileattributes)
 {
-	string result = "";
+	tstring result;
 
 	if (fileattributes & 0x20)
-		result += "A";
+		result += _T("A");
 	if (fileattributes & 0x4)
-		result += "S";
+		result += _T("S");
 	if (fileattributes & 0x2)
-		result += "H";
+		result += _T("H");
 	if (fileattributes & 0x1)
-		result += "R";
+		result += _T("R");
 	return result;
 }
 
-string DecodeMagic(unsigned int magic)
+tstring DecodeMagic(unsigned int magic)
 {
-	string result = "";
+	tstring result;
 
 	if (magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
-		result = "32-bit";
+		result = _T("32-bit");
 	else if (magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-		result = "64-bit";
+		result = _T("64-bit");
 	else if (magic == IMAGE_ROM_OPTIONAL_HDR_MAGIC)
-		result = "ROM";
+		result = _T("ROM");
 	return result;
 }
 
-string TwoListsToString(list<string> notBeforeChain, list<string> notAfterChain)
+tstring TwoListsToString(list<tstring> notBeforeChain, list<tstring> notAfterChain)
 {
-	list<string>::iterator i1;
-	list<string>::iterator i2;
+	list<tstring>::iterator i1;
+	list<tstring>::iterator i2;
 
-	string result;
-	for(i1=notBeforeChain.begin(), i2=notAfterChain.begin(); i1 != notBeforeChain.end() && i2 != notAfterChain.end(); i1++, i2++)
+	tstring result;
+	for (i1 = notBeforeChain.begin(), i2 = notAfterChain.begin(); i1 != notBeforeChain.end() && i2 != notAfterChain.end(); i1++, i2++)
 		if (i1 == notBeforeChain.begin())
-			result = *i1 + " - " + *i2;
+			result = *i1 + _T(" - ") + *i2;
 		else
-			result += "|" + *i1 + " - " + *i2;
+			result += _T("|") + *i1 + _T(" - ") + *i2;
 
 	return result;
 }
 
-string Quote(string data)
+tstring Quote(tstring data)
 {
-	if (string::npos == data.find(SEP))
+	if (tstring::npos == data.find(SEP))
 		return data;
 	else
-		return '"' + data + '"';
+		return _T('"') + data + _T('"');
 }
 
-void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOOL bCSV, BOOL bXML, BOOL bNoRevocation)
+void AnalyzePEFile(tstring filename, _TCHAR* pszCatalogFile, tostream& output, BOOL bCSV, BOOL bXML, BOOL bNoRevocation)
 {
 	int catalog;
 	unsigned int countCatalogs;
-	string catalogFilename;
-	string md5;
-	string compiletime;
-	string creationtime;
-	string lastwritetime;
-	string lastaccesstime;
+	tstring catalogFilename;
+	tstring md5;
+	tstring compiletime;
+	tstring creationtime;
+	tstring lastwritetime;
+	tstring lastaccesstime;
 	DWORD dwFileAttributes;
 	unsigned int uiCharacteristics;
 	unsigned int uiMagic;
@@ -236,30 +236,30 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 	unsigned int uiAddressOfEntryPoint;
 	unsigned int uiRVA15;
 	double entropy;
-	string error;
+	tstring error;
 	int signature;
 	long errorCode;
-	string issuerName;
-	string subjectName;
-	string signatureHashAlgorithm;
-	string signatureTimestamp;
-	string countersignTimestamp;
-	list<string> subjectNameChain;
-	list<string> signatureHashAlgorithmChain;
-	list<string> serialChain;
-	list<string> thumbprintChain;
+	tstring issuerName;
+	tstring subjectName;
+	tstring signatureHashAlgorithm;
+	tstring signatureTimestamp;
+	tstring countersignTimestamp;
+	list<tstring> subjectNameChain;
+	list<tstring> signatureHashAlgorithmChain;
+	list<tstring> serialChain;
+	list<tstring> thumbprintChain;
 	list<int> keylengthChain;
-	list<list<string>> extensionChain;
+	list<list<tstring>> extensionChain;
 	list<int> issuerUniqueIdChain;
 	list<int> subjectUniqueIdChain;
-	list<string> notBeforeChain;
-	list<string> notAfterChain;
-	string fileDescription;
-	string companyName;
-	string fileVersion;
-	string productVersion;
-	list<string> sections;
-	string clrVersion;
+	list<tstring> notBeforeChain;
+	list<tstring> notAfterChain;
+	tstring fileDescription;
+	tstring companyName;
+	tstring fileVersion;
+	tstring productVersion;
+	list<tstring> sections;
+	tstring clrVersion;
 	DWORD dwSignatureSize1;
 	DWORD dwSignatureSize2;
 	WORD wSignatureRevision;
@@ -269,12 +269,12 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 	DWORD dwPKCS7Size;
 	DWORD dwBytesAfterPKCS7;
 	DWORD dwBytesAfterPKCS7NotZero;
-	string signingtime;
+	tstring signingtime;
 	DWORD dwFileSize;
 	unsigned int uiIcons;
-	string extension;
-	string ownername;
-	string DEROIDHash;
+	tstring extension;
+	tstring ownername;
+	tstring DEROIDHash;
 
 	if (GetFileInfo(filename, compiletime, creationtime, lastwritetime, lastaccesstime, dwFileAttributes, uiCharacteristics, sections, uiMagic, uiSubsystem, uiSizeOfCode, uiAddressOfEntryPoint, uiRVA15, clrVersion, dwSignatureSize1, dwSignatureSize2, wSignatureRevision, wSignatureCertificateType, dwBytesAfterSignature, bParsePKCS7DERResult, dwPKCS7Size, dwBytesAfterPKCS7, dwBytesAfterPKCS7NotZero, signingtime, dwFileSize, ownername, DEROIDHash, error)
 		&& CalculateMD5OfFile(filename, md5, entropy, error))
@@ -284,24 +284,84 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 			signature = IsFileDigitallySigned(wfilename.c_str(), bNoRevocation, NULL, catalog, countCatalogs, catalogFilename, issuerName, subjectName, signatureHashAlgorithm, signatureTimestamp, countersignTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain, errorCode);
 		else
 		{
-			string catalogfilename = string(pszCatalogFile);
-			wstring wcatalogfilename = wstring(catalogfilename.begin(), catalogfilename.end());
+			wstring wcatalogfilename = LPTSTR_to_wstring(pszCatalogFile);
 			signature = IsFileDigitallySigned(wfilename.c_str(), bNoRevocation, wcatalogfilename.c_str(), catalog, countCatalogs, catalogFilename, issuerName, subjectName, signatureHashAlgorithm, signatureTimestamp, countersignTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain, errorCode);
 		}
 		GetVersionInfo(filename.c_str(), fileDescription, companyName, fileVersion, productVersion);
 		uiIcons = ExtractIconEx(filename.c_str(), -1, NULL, NULL, 0);
-		extension = string(PathFindExtension(filename.c_str()));
+		extension = PathFindExtension(filename.c_str());
 		std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 		if (bCSV)
 		{
-			output << Quote(filename) << SEP << Quote(extension) << SEP << md5 << SEP << entropy << SEP << dwFileSize << SEP << creationtime << SEP << lastwritetime << SEP << lastaccesstime << SEP << ownername << SEP << std::hex << dwFileAttributes << SEP << DecodeFileAttributes(dwFileAttributes) << SEP << uiCharacteristics << SEP << DecodeCharacteristics(uiCharacteristics) << SEP << uiMagic << SEP << DecodeMagic(uiMagic) << SEP << uiSubsystem << SEP << std::dec << uiSizeOfCode << SEP << std::hex << uiAddressOfEntryPoint << SEP << compiletime << SEP << uiRVA15 << std::dec << SEP << clrVersion << SEP << Quote(ListToString(sections, "|")) << SEP << dwSignatureSize1 << SEP << dwSignatureSize2 << SEP << std::hex << wSignatureRevision << std::dec << SEP << wSignatureCertificateType << SEP << dwBytesAfterSignature << SEP << bParsePKCS7DERResult << SEP << dwPKCS7Size << SEP << dwBytesAfterPKCS7 << SEP << dwBytesAfterPKCS7NotZero << SEP << signingtime << SEP << DEROIDHash << SEP << signature << SEP << Quote(MyFormatMessage(errorCode)) << SEP << catalog << SEP << countCatalogs << SEP << Quote(catalogFilename) << SEP << Quote(issuerName) << SEP << Quote(subjectName) << SEP << (thumbprintChain.empty() ? _TEXT("") : thumbprintChain.front()) << SEP << signatureTimestamp << SEP << countersignTimestamp << SEP << (extensionChain.empty() ? _TEXT("") : ListToStringSort(extensionChain.front(), "|")) << SEP << Quote(subjectNameChain.empty() ? _TEXT("") : subjectNameChain.back()) << SEP << (thumbprintChain.empty() ? _TEXT("") : thumbprintChain.back()) << SEP << signatureHashAlgorithm << SEP << TwoListsToString(notBeforeChain, notAfterChain) << SEP << Quote(ListToString(subjectNameChain, "|")) << SEP << ListToString(signatureHashAlgorithmChain, "|") << SEP << ListToString(serialChain, "|") << SEP << ListToString(thumbprintChain, "|") << SEP << ListIntToString(keylengthChain) << SEP << ListIntToString(issuerUniqueIdChain) << SEP << ListIntToString(subjectUniqueIdChain) << SEP << ListListToStringSort(extensionChain) << SEP << Quote(fileDescription) << SEP << Quote(companyName) << SEP << fileVersion << SEP << productVersion << SEP << uiIcons << endl;
+			output
+				<< Quote(filename) << SEP
+				<< Quote(extension) << SEP
+				<< md5 << SEP
+				<< entropy << SEP
+				<< dwFileSize << SEP
+				<< creationtime << SEP
+				<< lastwritetime << SEP
+				<< lastaccesstime << SEP
+				<< ownername << SEP
+				<< std::hex << dwFileAttributes << SEP
+				<< DecodeFileAttributes(dwFileAttributes) << SEP
+				<< uiCharacteristics << SEP
+				<< DecodeCharacteristics(uiCharacteristics) << SEP
+				<< uiMagic << SEP
+				<< DecodeMagic(uiMagic) << SEP
+				<< uiSubsystem << SEP
+				<< std::dec << uiSizeOfCode << SEP
+				<< std::hex << uiAddressOfEntryPoint << SEP
+				<< compiletime << SEP
+				<< uiRVA15 << std::dec << SEP
+				<< clrVersion << SEP
+				<< Quote(ListToString(sections, _T("|"))) << SEP
+				<< dwSignatureSize1 << SEP
+				<< dwSignatureSize2 << SEP
+				<< std::hex << wSignatureRevision << std::dec << SEP
+				<< wSignatureCertificateType << SEP
+				<< dwBytesAfterSignature << SEP
+				<< bParsePKCS7DERResult << SEP
+				<< dwPKCS7Size << SEP
+				<< dwBytesAfterPKCS7 << SEP
+				<< dwBytesAfterPKCS7NotZero << SEP
+				<< signingtime << SEP
+				<< DEROIDHash << SEP
+				<< signature << SEP
+				<< Quote(MyFormatMessage(errorCode)) << SEP
+				<< catalog << SEP
+				<< countCatalogs << SEP
+				<< Quote(catalogFilename) << SEP
+				<< Quote(issuerName) << SEP
+				<< Quote(subjectName) << SEP
+				<< (thumbprintChain.empty() ? _TEXT("") : thumbprintChain.front()) << SEP
+				<< signatureTimestamp << SEP
+				<< countersignTimestamp << SEP
+				<< (extensionChain.empty() ? _TEXT("") : ListToStringSort(extensionChain.front(), _T("|"))) << SEP
+				<< Quote(subjectNameChain.empty() ? _TEXT("") : subjectNameChain.back()) << SEP
+				<< (thumbprintChain.empty() ? _TEXT("") : thumbprintChain.back()) << SEP
+				<< signatureHashAlgorithm << SEP
+				<< TwoListsToString(notBeforeChain, notAfterChain) << SEP
+				<< Quote(ListToString(subjectNameChain, _T("|"))) << SEP
+				<< ListToString(signatureHashAlgorithmChain, _T("|")) << SEP
+				<< ListToString(serialChain, _T("|")) << SEP
+				<< ListToString(thumbprintChain, _T("|")) << SEP
+				<< ListIntToString(keylengthChain) << SEP
+				<< ListIntToString(issuerUniqueIdChain) << SEP
+				<< ListIntToString(subjectUniqueIdChain) << SEP
+				<< ListListToStringSort(extensionChain) << SEP
+				<< Quote(fileDescription) << SEP
+				<< Quote(companyName) << SEP
+				<< fileVersion << SEP
+				<< productVersion << SEP
+				<< uiIcons << endl;
 		}
 		else if (bXML)
 		{
-			list<string>::iterator i1;
+			list<tstring>::iterator i1;
 			list<int>::iterator i2;
-			list<list<string>>::iterator i3;
-			list<string>::iterator i4;
+			list<list<tstring>>::iterator i3;
+			list<tstring>::iterator i4;
 
 			output << _TEXT("  <file>") << endl;
 			output << XMLElementSingleLine(4, _TEXT("filename"), filename) << endl;
@@ -326,7 +386,7 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 			output << _TEXT("    <RVA15>") << uiRVA15 << _TEXT("</RVA15>") << std::dec << endl;
 			output << _TEXT("    <clrVersion>") << clrVersion << _TEXT("</clrVersion>") << endl;
 			output << _TEXT("    <sections>") << endl;
-			for(i1=sections.begin(); i1 != sections.end(); i1++)
+			for (i1 = sections.begin(); i1 != sections.end(); i1++)
 				output << XMLElementSingleLine(6, _TEXT("section"), *i1) << endl;
 			output << _TEXT("    </sections>") << endl;
 			output << _TEXT("    <signatureSize1>") << dwSignatureSize1 << _TEXT("</signatureSize1>") << endl;
@@ -353,7 +413,7 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 			output << _TEXT("    <extensions>") << endl;
 			if (!extensionChain.empty())
 			{
-				list<string> extensions = extensionChain.front();
+				list<tstring> extensions = extensionChain.front();
 				extensions.sort();
 				for (i1=extensions.begin(); i1 != extensions.end(); i1++)
 					output << XMLElementSingleLine(6, _TEXT("extension"), *i1) << endl;
@@ -417,10 +477,10 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 		}
 		else
 		{
-			list<string>::iterator i1;
+			list<tstring>::iterator i1;
 			list<int>::iterator i2;
-			list<list<string>>::iterator i3;
-			list<string>::iterator i4;
+			list<list<tstring>>::iterator i3;
+			list<tstring>::iterator i4;
 
 			output << _TEXT("Filename:                             ") << filename << endl;
 			output << _TEXT("Extension:                            ") << extension << endl;
@@ -443,7 +503,7 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 			output << _TEXT("Compile time:                         ") << compiletime << endl;
 			output << _TEXT("RVA15:                                ") << uiRVA15 << endl;
 			output << _TEXT("CLR version:                          ") << clrVersion << endl;
-			output << _TEXT("Sections:                             ") << ListToString(sections, ",") << endl;
+			output << _TEXT("Sections:                             ") << ListToString(sections, _T(",")) << endl;
 			output << _TEXT("Signature size 1:                     ") << std::dec << dwSignatureSize1 << endl;
 			output << _TEXT("Signature size 2:                     ") << dwSignatureSize2 << endl;
 			output << _TEXT("Signature Revision:                   ") << std::hex << wSignatureRevision << std::dec << endl;
@@ -465,7 +525,7 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 			output << _TEXT("Subject thumbprint:                   ") << (thumbprintChain.empty() ? _TEXT("") : thumbprintChain.front()) << endl;
 			output << _TEXT("Timestamp signature:                  ") << signatureTimestamp << endl;
 			output << _TEXT("Timestamp countersignature:           ") << countersignTimestamp << endl;
-			output << _TEXT("Extensions:                           ") << (extensionChain.empty() ? _TEXT("") : ListToStringSort(extensionChain.front(), ",")) << endl;
+			output << _TEXT("Extensions:                           ") << (extensionChain.empty() ? _TEXT("") : ListToStringSort(extensionChain.front(), _T(","))) << endl;
 			output << _TEXT("Root name:                            ") << (subjectNameChain.empty() ? _TEXT("") : subjectNameChain.back()) << endl;
 			output << _TEXT("Root thumbprint:                      ") << (thumbprintChain.empty() ? _TEXT("") : thumbprintChain.back()) << endl;
 			output << _TEXT("Signature hash algorithm:             ") << signatureHashAlgorithm << endl;
@@ -489,7 +549,7 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 			for(i2=subjectUniqueIdChain.begin(); i2 != subjectUniqueIdChain.end(); i2++)
 				output << _TEXT("Subject unique ID chain:              ") << *i2 << endl;
 			for(i3=extensionChain.begin(); i3 != extensionChain.end(); i3++)
-				output << _TEXT("Extensions chain:                     ") << ListToStringSort(*i3, ",") << endl;
+				output << _TEXT("Extensions chain:                     ") << ListToStringSort(*i3, _T(",")) << endl;
 			output << _TEXT("File description:                     ") << fileDescription << endl;
 			output << _TEXT("Company name:                         ") << companyName << endl;
 			output << _TEXT("File version:                         ") << fileVersion << endl;
@@ -518,7 +578,7 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 
 #define BUFSIZE 4
 
-void ProcessFiles(const _TCHAR* pszArgument, ostream& output, BOOL bOutputToFile, _TCHAR* pszCatalogFile, BOOL bRecurse, BOOL bCSV, BOOL bPEFilesOnly, BOOL bXML, BOOL bReparsePointFollow, BOOL bNoRevocation)
+void ProcessFiles(const _TCHAR* pszArgument, tostream& output, BOOL bOutputToFile, _TCHAR* pszCatalogFile, BOOL bRecurse, BOOL bCSV, BOOL bPEFilesOnly, BOOL bXML, BOOL bReparsePointFollow, BOOL bNoRevocation)
 {
 #define MY_MAX_PATH MAX_PATH*2
 
@@ -539,7 +599,7 @@ void ProcessFiles(const _TCHAR* pszArgument, ostream& output, BOOL bOutputToFile
 			hFind = FindFirstFile(szDirectory, &FindFileData);
 			if (hFind == INVALID_HANDLE_VALUE) 
 			{
-				cout << _TEXT("FindFirstFile failed: error ") << GetLastError() << " directory " << szDirectory << endl;
+				tcout << _TEXT("FindFirstFile failed: error ") << GetLastError() << " directory " << szDirectory << endl;
 				return;
 			} 
 			else 
@@ -547,21 +607,21 @@ void ProcessFiles(const _TCHAR* pszArgument, ostream& output, BOOL bOutputToFile
 				do
 				{
 					StringCchCopy(szFile, MY_MAX_PATH, pszArgument);
-					if (strlen(szFile) > 0 && '\\' != szFile[strlen(szFile) - 1])
+					if (_tcslen(szFile) > 0 && '\\' != szFile[_tcslen(szFile) - 1])
 						StringCchCat(szFile, MY_MAX_PATH, _TEXT("\\"));
 					StringCchCat(szFile, MY_MAX_PATH, FindFileData.cFileName);
 					if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 					{
-						if (bRecurse && strcmp(FindFileData.cFileName, ".") && strcmp(FindFileData.cFileName, ".."))
+						if (bRecurse && _tcscmp(FindFileData.cFileName, _T(".")) && _tcscmp(FindFileData.cFileName, _T("..")))
 							ProcessFiles(szFile, output, bOutputToFile, pszCatalogFile, bRecurse, bCSV, bPEFilesOnly, bXML, bReparsePointFollow, bNoRevocation);
 					}
 					else
 					{
 						if (bOutputToFile)
-							cout << "\b\b\b\b\b\b\b\b\b\b" << ++iProgress;
+							tcout << _T("\b\b\b\b\b\b\b\b\b\b") << ++iProgress;
 						if (!bPEFilesOnly || bPEFilesOnly && IsPEFile(szFile))
 						{
-							AnalyzePEFile(string(szFile), pszCatalogFile, output, bCSV, bXML, bNoRevocation);
+							AnalyzePEFile(szFile, pszCatalogFile, output, bCSV, bXML, bNoRevocation);
 						}
 					}
 				} while (FindNextFile(hFind, &FindFileData));
@@ -572,45 +632,45 @@ void ProcessFiles(const _TCHAR* pszArgument, ostream& output, BOOL bOutputToFile
 	else
 	{
 		if (bOutputToFile)
-			cout << "\b\b\b\b\b\b\b\b\b\b" << ++iProgress;
-		AnalyzePEFile(string(pszArgument), pszCatalogFile, output, bCSV, bXML, bNoRevocation);
+			tcout << _T("\b\b\b\b\b\b\b\b\b\b") << ++iProgress;
+		AnalyzePEFile(pszArgument, pszCatalogFile, output, bCSV, bXML, bNoRevocation);
 	}
 }
 
-string RTrimSpaces(const string input)
+tstring RTrimSpaces(const tstring input)
 {
 	size_t endpos = input.find_last_not_of(TEXT(" "));
-	if (string::npos == endpos)
+	if (tstring::npos == endpos)
 		return input;
 	else
 		return input.substr(0, endpos+1);
 }
 
-string LTrimSpaces(const string input)
+tstring LTrimSpaces(const tstring input)
 {
 	size_t startpos = input.find_first_not_of(TEXT(" "));
-	if (string::npos == startpos)
+	if (tstring::npos == startpos)
 		return input;
 	else
 		return input.substr(startpos);
 }
 
-string TrimSpaces(const string input)
+tstring TrimSpaces(const tstring input)
 {
 	return LTrimSpaces(RTrimSpaces(input));
 }
 
-BOOL StartsWith(const string input, const string prefix)
+BOOL StartsWith(const tstring input, const tstring prefix)
 {
 	return input.compare(0, prefix.size(), prefix) == 0;
 }
 
-void ProcessAtFile(_TCHAR* pszArgument, ostream& output, BOOL bOutputToFile, _TCHAR* pszCatalogFile, BOOL bRecurse, BOOL bCSV, BOOL bPEFilesOnly, BOOL bXML, BOOL bReparsePointFollow, BOOL bNoRevocation)
+void ProcessAtFile(_TCHAR* pszArgument, tostream& output, BOOL bOutputToFile, _TCHAR* pszCatalogFile, BOOL bRecurse, BOOL bCSV, BOOL bPEFilesOnly, BOOL bXML, BOOL bReparsePointFollow, BOOL bNoRevocation)
 {
-	cout << "@File: " << pszArgument << "\n";
+	tcout << "@File: " << pszArgument << "\n";
 	BOOL bErrorParsingFile = FALSE;
-	string line;
-	ifstream myfile(pszArgument);
+	tstring line;
+	tifstream myfile(pszArgument);
 	if (myfile.is_open())
 	{
 		while (myfile.good())
@@ -643,12 +703,12 @@ typedef struct
 	_TCHAR** ppszTarget;
 } OPTIONS;
 
-int ParseArgs(int argc, char *argv[], OPTIONS *pOPTIONS)
+int ParseArgs(int argc, TCHAR *argv[], OPTIONS *pOPTIONS)
 {
 	int iCountParameters = 0;
 	int iFlagOutputFile = 0;
 	int iFlagCatalogFile = 0;
-	char *pcFlags;
+	TCHAR *pcFlags;
 
 	pOPTIONS->bRecurse = FALSE;
 	pOPTIONS->bCSV = FALSE;
@@ -666,7 +726,7 @@ int ParseArgs(int argc, char *argv[], OPTIONS *pOPTIONS)
 	pOPTIONS->ppszTarget = (_TCHAR**) LocalAlloc(LPTR, sizeof(_TCHAR*) * argc);
 	if (pOPTIONS->ppszTarget == NULL)
 	{
-		cout << _TEXT("LocalAlloc error") << endl;
+		tcout << _TEXT("LocalAlloc error") << endl;
 		return 1;
 	}
 
@@ -750,11 +810,11 @@ int ParseArgs(int argc, char *argv[], OPTIONS *pOPTIONS)
 //Adjust token privileges to enable SE_BACKUP_NAME
 BOOL CurrentProcessAdjustToken(void)
 {
-  HANDLE hToken;
-  TOKEN_PRIVILEGES sTP;
+	HANDLE hToken;
+	TOKEN_PRIVILEGES sTP;
 
-  if(OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
-  {
+	if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+	{
 		if (!LookupPrivilegeValue(NULL, SE_BACKUP_NAME, &sTP.Privileges[0].Luid))
 		{
 			CloseHandle(hToken);
@@ -769,15 +829,17 @@ BOOL CurrentProcessAdjustToken(void)
 		}
 		CloseHandle(hToken);
 		return TRUE;
-  }
+	}
 	return FALSE;
 }
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	_setmode(_fileno(stdout), _O_TTEXT);
+
 	OPTIONS sOptions;
-	streambuf *streamBuffer;
-	ofstream ofstreamOutputFile;
+	tstreambuf *streamBuffer;
+	tofstream ofstreamOutputFile;
 
 #ifdef AUTO
 
@@ -788,12 +850,12 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	if (argc != 1)
 	{
-		cout << _TEXT("This version takes no arguments") << endl;
+		tcout << _TEXT("This version takes no arguments") << endl;
 
 		return -1;
 	}
 
-	cout << _TEXT("AnalyzePESig auto mode") << endl;
+	tcout << _TEXT("AnalyzePESig auto mode") << endl;
 
 	sOptions.bRecurse = TRUE;
 	sOptions.bCSV = TRUE;
@@ -810,10 +872,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	sOptions.ppszTarget = (_TCHAR**) LocalAlloc(LPTR, sizeof(_TCHAR*) * 27);
 	if (sOptions.ppszTarget == NULL)
 	{
-		cout << _TEXT("LocalAlloc error") << endl;
+		tcout << _TEXT("LocalAlloc error") << endl;
 		return 1;
 	}
-	cout << _TEXT("Drives: ");
+	tcout << _TEXT("Drives: ");
 	dwUnitmask = GetLogicalDrives() >> 2;
 	for (int iDrive = 2; iDrive < 26; iDrive++)
 	{
@@ -824,37 +886,38 @@ int _tmain(int argc, _TCHAR* argv[])
 			switch (uiDriveType)
 			{
 				case DRIVE_FIXED:
-					cout << aatcDrives[iDrive] << _TEXT(" ");
+					tcout << aatcDrives[iDrive] << _TEXT(" ");
 					sOptions.ppszTarget[iDriveCounter++] = aatcDrives[iDrive];
 					break;
 			}
 		}
 		dwUnitmask = dwUnitmask >> 1;
 	}
-	cout << endl;
+	tcout << endl;
 
 #else
 
 	if (ParseArgs(argc, argv, &sOptions))
 	{
-		cout << _TEXT("Usage: AnalyzePESig [options] [@]filename ...") << endl;
-		cout << _TEXT("Version 0.0.0.4") << endl;
-		cout << _TEXT(" -e Scan executable images only (regardless of their extension)") << endl;
-		cout << _TEXT(" -o Output to file") << endl;
-		cout << _TEXT(" -O Output to file with generated name") << endl;
-		cout << _TEXT(" -g Generate output file name with option -o") << endl;
-		cout << _TEXT(" -s Recurse subdirectories") << endl;
-		cout << _TEXT(" -l Follow links (follow link when directory is a reparse point)") << endl;
-		cout << _TEXT(" -r No revocation checks") << endl;
-		cout << _TEXT(" -v CSV output") << endl;
-		cout << _TEXT(" -x XML output") << endl;
-		cout << _TEXT(" -c Use given catalog file") << endl;
+		tcout << _TEXT("Usage: AnalyzePESig [options] [@]filename ...") << endl;
+		tcout << _TEXT("Version 0.0.0.4") << endl;
+		tcout << _TEXT(" -e Scan executable images only (regardless of their extension)") << endl;
+		tcout << _TEXT(" -o Output to file") << endl;
+		tcout << _TEXT(" -O Output to file with generated name") << endl;
+		tcout << _TEXT(" -g Generate output file name with option -o") << endl;
+		tcout << _TEXT(" -s Recurse subdirectories") << endl;
+		tcout << _TEXT(" -l Follow links (follow link when directory is a reparse point)") << endl;
+		tcout << _TEXT(" -r No revocation checks") << endl;
+		tcout << _TEXT(" -v CSV output") << endl;
+		tcout << _TEXT(" -x XML output") << endl;
+		tcout << _TEXT(" -c Use given catalog file") << endl;
 
 		return -1;
 	}
 
 #endif
 
+	tstring outputFile;
 	if (sOptions.bOutputToFileWithHostname || (sOptions.bGenerateOutputFilename && sOptions.bOutputToFile))
 	{
 		TCHAR computerName[MAX_COMPUTERNAME_LENGTH + 1];
@@ -869,21 +932,99 @@ int _tmain(int argc, _TCHAR* argv[])
 			StringCchPrintf(reportName, sizeof(reportName)/sizeof(reportName[0]), TEXT("AnalyzePESig-%s-%04d%02d%02d-%02d%02d%02d.csv"), computerName, sST.wYear, sST.wMonth, sST.wDay, sST.wHour, sST.wMinute, sST.wSecond);
 		else
 			StringCchPrintf(reportName, sizeof(reportName)/sizeof(reportName[0]), TEXT("AnalyzePESig-%s-%04d%02d%02d-%02d%02d%02d.csv"), sOptions.pszOutputFile, sST.wYear, sST.wMonth, sST.wDay, sST.wHour, sST.wMinute, sST.wSecond);
-		ofstreamOutputFile.open(reportName);
-		streamBuffer = ofstreamOutputFile.rdbuf();
+
+		outputFile = reportName;
 	}
 	else if (sOptions.bOutputToFile)
 	{
-		ofstreamOutputFile.open(sOptions.pszOutputFile);
+		outputFile = sOptions.pszOutputFile;
+	}
+
+	if (!outputFile.empty())
+	{
+		// Preserve Unicode. Excel 2016 opens .csv files in UTF-8 with BOM seamlessly
+		FILE *stream;
+		errno_t err = _tfopen_s(&stream, outputFile.c_str(), _T("wt") _T(TEXT_FILE_CCS));
+		if (err)
+		{
+#pragma warning(push)
+#pragma warning(disable: 4996)
+			tcout << _TEXT("Failed to open output file '") << outputFile << _TEXT("'. Error: ") << err << _T(" ") << _tcserror(err) << endl;
+#pragma warning(pop)
+			return -1;
+		}
+		ofstreamOutputFile = tofstream(stream);
 		streamBuffer = ofstreamOutputFile.rdbuf();
 	}
 	else
-		streamBuffer = cout.rdbuf();
-	ostream output(streamBuffer);
+		streamBuffer = tcout.rdbuf();
+
+	tostream output(streamBuffer);
 
 	if (sOptions.bCSV)
 	{
-		output << _TEXT("Filename") << SEP << _TEXT("Extension") << SEP << _TEXT("MD5") << SEP << _TEXT("Entropy") << SEP << _TEXT("Filesize") << SEP << _TEXT("Creation_time") << SEP << _TEXT("Last_write_time") << SEP << _TEXT("Last_access_time") << SEP << _TEXT("Owner_name") << SEP << _TEXT("File_attributes") << SEP << _TEXT("File_attributes") << SEP << _TEXT("Characteristics") << SEP << _TEXT("Characteristics") << SEP << _TEXT("Magic") << SEP << _TEXT("Magic") << SEP << _TEXT("Subsystem") << SEP << _TEXT("Size_of_code") << SEP << _TEXT("Address_of_entry_point") << SEP << _TEXT("Compile_time") << SEP << _TEXT("RVA15") << SEP << _TEXT("CLR_Version") << SEP << _TEXT("Sections") << SEP << _TEXT("Signature_size_1") << SEP << _TEXT("Signature_size_2") << SEP << _TEXT("Signature_Revision") << SEP << _TEXT("Signature_Certificate_Type") << SEP << _TEXT("Bytes_after_signature") << SEP << _TEXT("Result_PKCS7_parser") << SEP << _TEXT("PKCS7_size") << SEP << _TEXT("Bytes_after_PKCS7_signature") << SEP << _TEXT("Bytes_after_PKCS7_signature_not_zero") << SEP << _TEXT("PKCS7_signingtime") << SEP << _TEXT("DEROIDHash") << SEP << _TEXT("Signature") << SEP << _TEXT("Error_code") << SEP << _TEXT("Catalog") << SEP << _TEXT("Catalogs") << SEP << _TEXT("Catalog_Filename") << SEP << _TEXT("Issuer_Name") << SEP << _TEXT("Subject_Name") << SEP << _TEXT("Subject_Thumbprint") << SEP << _TEXT("Signature_Timestamp") << SEP << _TEXT("Countersignature_Timestamp") << SEP << _TEXT("Extensions") << SEP << _TEXT("Root_Subject_Name") << SEP << _TEXT("Root_Thumbprint") << SEP << _TEXT("Signature_Hash_Algorithm") << SEP << _TEXT("Not_before_and_not_after") << SEP << _TEXT("Subject_Name_Chain") << SEP << _TEXT("Signature_Hash_Algorithm_Chain") << SEP << _TEXT("Serial_Chain") << SEP << _TEXT("Thumbprint_Chain") << SEP << _TEXT("Keylength_Chain") << SEP << _TEXT("Issuer_Unique_Id_Chain") << SEP << _TEXT("Subject_Unique_Id_Chain") << SEP << _TEXT("Extensions_Chain") << SEP << _TEXT("File_Description") << SEP << _TEXT("Company_Name") << SEP << _TEXT("File_Version") << SEP << _TEXT("Product_Version") << SEP << _TEXT("Icons") << endl;
+		output
+			<< _TEXT("Filename") << SEP
+			<< _TEXT("Extension") << SEP
+			<< _TEXT("MD5") << SEP
+			<< _TEXT("Entropy") << SEP
+			<< _TEXT("Filesize") << SEP
+			<< _TEXT("Creation_time") << SEP
+			<< _TEXT("Last_write_time") << SEP
+			<< _TEXT("Last_access_time") << SEP
+			<< _TEXT("Owner_name") << SEP
+			<< _TEXT("File_attributes") << SEP
+			<< _TEXT("File_attributes") << SEP
+			<< _TEXT("Characteristics") << SEP
+			<< _TEXT("Characteristics") << SEP
+			<< _TEXT("Magic") << SEP
+			<< _TEXT("Magic") << SEP
+			<< _TEXT("Subsystem") << SEP
+			<< _TEXT("Size_of_code") << SEP
+			<< _TEXT("Address_of_entry_point") << SEP
+			<< _TEXT("Compile_time") << SEP
+			<< _TEXT("RVA15") << SEP
+			<< _TEXT("CLR_Version") << SEP
+			<< _TEXT("Sections") << SEP
+			<< _TEXT("Signature_size_1") << SEP
+			<< _TEXT("Signature_size_2") << SEP
+			<< _TEXT("Signature_Revision") << SEP
+			<< _TEXT("Signature_Certificate_Type") << SEP
+			<< _TEXT("Bytes_after_signature") << SEP
+			<< _TEXT("Result_PKCS7_parser") << SEP
+			<< _TEXT("PKCS7_size") << SEP
+			<< _TEXT("Bytes_after_PKCS7_signature") << SEP
+			<< _TEXT("Bytes_after_PKCS7_signature_not_zero") << SEP
+			<< _TEXT("PKCS7_signingtime") << SEP
+			<< _TEXT("DEROIDHash") << SEP
+			<< _TEXT("Signature") << SEP
+			<< _TEXT("Error_code") << SEP
+			<< _TEXT("Catalog") << SEP
+			<< _TEXT("Catalogs") << SEP
+			<< _TEXT("Catalog_Filename") << SEP
+			<< _TEXT("Issuer_Name") << SEP
+			<< _TEXT("Subject_Name") << SEP
+			<< _TEXT("Subject_Thumbprint") << SEP
+			<< _TEXT("Signature_Timestamp") << SEP
+			<< _TEXT("Countersignature_Timestamp") << SEP
+			<< _TEXT("Extensions") << SEP
+			<< _TEXT("Root_Subject_Name") << SEP
+			<< _TEXT("Root_Thumbprint") << SEP
+			<< _TEXT("Signature_Hash_Algorithm") << SEP
+			<< _TEXT("Not_before_and_not_after") << SEP
+			<< _TEXT("Subject_Name_Chain") << SEP
+			<< _TEXT("Signature_Hash_Algorithm_Chain") << SEP
+			<< _TEXT("Serial_Chain") << SEP
+			<< _TEXT("Thumbprint_Chain") << SEP
+			<< _TEXT("Keylength_Chain") << SEP
+			<< _TEXT("Issuer_Unique_Id_Chain") << SEP
+			<< _TEXT("Subject_Unique_Id_Chain") << SEP
+			<< _TEXT("Extensions_Chain") << SEP
+			<< _TEXT("File_Description") << SEP
+			<< _TEXT("Company_Name") << SEP
+			<< _TEXT("File_Version") << SEP
+			<< _TEXT("Product_Version") << SEP
+			<< _TEXT("Icons") << endl;
 	}
 	if (sOptions.bXML)
 		output << _TEXT("<files>") << endl;
