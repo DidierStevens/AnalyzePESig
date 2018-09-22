@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -44,55 +44,55 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>NotSet</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>NotSet</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release CRT|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release CRT auto|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release CRT|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release CRT auto|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -164,7 +164,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
+      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Sign</Message>
@@ -182,7 +182,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
+      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Sign</Message>
@@ -204,7 +204,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
+      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Sign</Message>
@@ -227,7 +227,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
+      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Sign</Message>
@@ -252,7 +252,7 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
+      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Sign</Message>
@@ -274,7 +274,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
+      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Sign</Message>
@@ -297,7 +297,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
+      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Sign</Message>
@@ -322,7 +322,7 @@
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
+      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Sign</Message>
