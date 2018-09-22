@@ -152,6 +152,16 @@
     <LinkIncremental>false</LinkIncremental>
     <TargetName>$(ProjectName)-crt-auto-x64</TargetName>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <PostBuildEvent>
+      <Command>set CertificateChoice=/a
+if defined DidierStevensLabsCertificateSha1 set CertificateChoice=/sha1 %25DidierStevensLabsCertificateSha1%25
+signtool.exe sign /fd sha256 "%25CertificateChoice%25" /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Sign</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -163,12 +173,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Sign</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -181,12 +185,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Sign</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -203,12 +201,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <PostBuildEvent>
-      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Sign</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release CRT|Win32'">
     <ClCompile>
@@ -226,12 +218,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <PostBuildEvent>
-      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Sign</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release CRT auto|Win32'">
     <ClCompile>
@@ -251,12 +237,6 @@
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
-    <PostBuildEvent>
-      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Sign</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -273,12 +253,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <PostBuildEvent>
-      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Sign</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release CRT|x64'">
     <ClCompile>
@@ -296,12 +270,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <PostBuildEvent>
-      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Sign</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release CRT auto|x64'">
     <ClCompile>
@@ -321,12 +289,6 @@
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
-    <PostBuildEvent>
-      <Command>signtool.exe sign /fd sha256 /sha1 833EE812F66080F4FB68A310267F5BFC4F251E8F /td sha256 /tr http://timestamp.globalsign.com/scripts/timestamp.dll "$(TargetPath)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Sign</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
