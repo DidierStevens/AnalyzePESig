@@ -1750,7 +1750,7 @@ BOOL ParsePKCS7DER(PBYTE pbSignature, DWORD dwSize, DWORD& dwPKCS7Size, DWORD& d
 	char szSigningTime[0x0D + 1];
 
 	if (NULL == pbSignature)
-			return FALSE;
+		return FALSE;
 	if (!SafeToReadNBytes(dwSize, 0, 2))
 		return FALSE;
 	if (0x30 != pbSignature[0])
@@ -1772,16 +1772,16 @@ BOOL ParsePKCS7DER(PBYTE pbSignature, DWORD dwSize, DWORD& dwPKCS7Size, DWORD& d
 
 	dwBytesAfterPKCS7 = dwSize - dwBytesParsed - dwPKCS7Size;
 	for (DWORD i = 0; i < dwBytesAfterPKCS7; i++)
-	if (0x00 != pbSignature[dwBytesParsed + dwPKCS7Size + i])
-		dwBytesAfterPKCS7NotZero++;
+		if (0x00 != pbSignature[dwBytesParsed + dwPKCS7Size + i])
+			dwBytesAfterPKCS7NotZero++;
 
 	for (DWORD i = 0; i < dwPKCS7Size - sizeof(abSigningTime); i++)
-	if (pbSignature[dwBytesParsed + i] == abSigningTime[0])
-	if (!memcmp(pbSignature + dwBytesParsed + i, abSigningTime, sizeof(abSigningTime)))
-	{
-		strncpy_s(szSigningTime, (char *)(pbSignature + dwBytesParsed + i + sizeof(abSigningTime)), 0x0D);
-		signingtime = Utf8LPSTR_to_tstring(szSigningTime);
-	}
+		if (pbSignature[dwBytesParsed + i] == abSigningTime[0])
+			if (!memcmp(pbSignature + dwBytesParsed + i, abSigningTime, sizeof(abSigningTime)))
+			{
+				strncpy_s(szSigningTime, (char *)(pbSignature + dwBytesParsed + i + sizeof(abSigningTime)), 0x0D);
+				signingtime = Utf8LPSTR_to_tstring(szSigningTime);
+			}
 
 	return TRUE;
 }
@@ -1945,7 +1945,8 @@ BOOL GetFileInfo(tstring filename, tstring& compiletime, tstring& creationtime, 
 	}
 	if (0 != dwRVASignature)
 		dwBytesAfterSignature = liFileSize.LowPart - dwRVASignature - dwSignatureSize1;
-	if (dwSignatureSize1 > 8)
+	static_assert(8 == offsetof(WIN_CERTIFICATE, bCertificate), "Old code used the hardcoded offset 8");
+	if (dwSignatureSize1 > offsetof(WIN_CERTIFICATE, bCertificate))
 	{
 		pbSignature = (PBYTE) LocalAlloc(LPTR, dwSignatureSize1);
 		if (!pbSignature)
@@ -1962,8 +1963,8 @@ BOOL GetFileInfo(tstring filename, tstring& compiletime, tstring& creationtime, 
 			dwSignatureSize2 = psWC->dwLength;
 			wSignatureRevision = psWC->wRevision;
 			wSignatureCertificateType = psWC->wCertificateType;
-			bParsePKCS7DERResult = ParsePKCS7DER(pbSignature + 8, dwSignatureSize1 - 8, dwPKCS7Size, dwBytesAfterPKCS7, dwBytesAfterPKCS7NotZero, signingtime);
-			DEROIDHash = CalculateDEROIDHash(pbSignature + 8, dwSignatureSize1 - 8 - dwBytesAfterPKCS7);
+			bParsePKCS7DERResult = ParsePKCS7DER(psWC->bCertificate, dwSignatureSize1 - offsetof(WIN_CERTIFICATE, bCertificate), dwPKCS7Size, dwBytesAfterPKCS7, dwBytesAfterPKCS7NotZero, signingtime);
+			DEROIDHash = CalculateDEROIDHash(psWC->bCertificate, dwSignatureSize1 - offsetof(WIN_CERTIFICATE, bCertificate) - dwBytesAfterPKCS7);
 		}
 		LocalFree(pbSignature);
 	}
