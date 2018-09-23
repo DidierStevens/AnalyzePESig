@@ -212,10 +212,23 @@ tstring TwoListsToString(list<tstring> notBeforeChain, list<tstring> notAfterCha
 
 tstring Quote(tstring data)
 {
+	const TCHAR QuoteChar = _T('"');
 	if (tstring::npos == data.find(SEP))
 		return data;
 	else
-		return _T('"') + data + _T('"');
+	{
+		// Escape all quote characters by doubling them
+		tstringbuf result;
+		result.sputc(QuoteChar);
+		for (auto it = data.cbegin(); it != data.cend(); it++)
+		{
+			result.sputc(*it);
+			if (*it== QuoteChar)
+				result.sputc(QuoteChar);
+		}
+		result.sputc(QuoteChar);
+		return result.str();
+	}
 }
 
 void AnalyzePEFile(tstring filename, _TCHAR* pszCatalogFile, tostream& output, BOOL bCSV, BOOL bXML, BOOL bNoRevocation)
