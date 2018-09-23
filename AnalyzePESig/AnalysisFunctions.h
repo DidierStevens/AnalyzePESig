@@ -23,7 +23,7 @@ using namespace std;
 tstring MyFormatMessage(DWORD);
 BOOL CalculateMD5OfFile(tstring, tstring&, double&, tstring&);
 BOOL GetVersionInfo(LPCTSTR, tstring&, tstring&, tstring&, tstring&);
-BOOL IsFileDigitallySigned(LPCWSTR, BOOL, LPCWSTR, int&, unsigned int&, tstring&, tstring&, tstring&, tstring&, tstring&, tstring&, list<tstring>&, list<tstring>&, list<tstring>&, list<tstring>&, list <int>&, list<list<tstring>>&, list <int>&, list <int>&, list<tstring>&, list<tstring>&, long&);
+BOOL IsFileDigitallySigned(LPCWSTR, tstring&, tstring&, BOOL, LPCWSTR, int&, unsigned int&, tstring&, tstring&, tstring&, tstring&, tstring&, tstring&, list<tstring>&, list<tstring>&, list<tstring>&, list<tstring>&, list <int>&, list<list<tstring>>&, list <int>&, list <int>&, list<tstring>&, list<tstring>&, long&);
 BOOL GetFileInfo(tstring, tstring&, tstring&, tstring&, tstring&, DWORD&, unsigned int&, list<tstring>&, unsigned int&, unsigned int&, unsigned int&, unsigned int&, unsigned int&, tstring&, DWORD&, DWORD&, WORD&, WORD&, DWORD&, BOOL&, DWORD&, DWORD&, DWORD&, tstring&, DWORD&, tstring&, tstring&, tstring&);
 BOOL IsPEFile(_TCHAR*);
 BOOL GetFileSecurityInfo(tstring, LPTSTR, ACCESS_MASK&);

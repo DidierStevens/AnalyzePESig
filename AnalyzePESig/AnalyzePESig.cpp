@@ -233,6 +233,8 @@ tstring Quote(tstring data)
 
 void AnalyzePEFile(tstring filename, _TCHAR* pszCatalogFile, tostream& output, BOOL bCSV, BOOL bXML, BOOL bNoRevocation)
 {
+	tstring displayName;
+	tstring moreInfoLink;
 	int catalog;
 	unsigned int countCatalogs;
 	tstring catalogFilename;
@@ -294,11 +296,11 @@ void AnalyzePEFile(tstring filename, _TCHAR* pszCatalogFile, tostream& output, B
 	{
 		wstring wfilename = wstring(filename.begin(), filename.end());
 		if (pszCatalogFile == NULL)
-			signature = IsFileDigitallySigned(wfilename.c_str(), bNoRevocation, NULL, catalog, countCatalogs, catalogFilename, issuerName, subjectName, signatureHashAlgorithm, signatureTimestamp, countersignTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain, errorCode);
+			signature = IsFileDigitallySigned(wfilename.c_str(), displayName, moreInfoLink, bNoRevocation, NULL, catalog, countCatalogs, catalogFilename, issuerName, subjectName, signatureHashAlgorithm, signatureTimestamp, countersignTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain, errorCode);
 		else
 		{
 			wstring wcatalogfilename = LPTSTR_to_wstring(pszCatalogFile);
-			signature = IsFileDigitallySigned(wfilename.c_str(), bNoRevocation, wcatalogfilename.c_str(), catalog, countCatalogs, catalogFilename, issuerName, subjectName, signatureHashAlgorithm, signatureTimestamp, countersignTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain, errorCode);
+			signature = IsFileDigitallySigned(wfilename.c_str(), displayName, moreInfoLink, bNoRevocation, wcatalogfilename.c_str(), catalog, countCatalogs, catalogFilename, issuerName, subjectName, signatureHashAlgorithm, signatureTimestamp, countersignTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain, errorCode);
 		}
 		GetVersionInfo(filename.c_str(), fileDescription, companyName, fileVersion, productVersion);
 		uiIcons = ExtractIconEx(filename.c_str(), -1, NULL, NULL, 0);
@@ -342,6 +344,8 @@ void AnalyzePEFile(tstring filename, _TCHAR* pszCatalogFile, tostream& output, B
 				<< DEROIDHash << SEP
 				<< signature << SEP
 				<< Quote(MyFormatMessage(errorCode)) << SEP
+				<< Quote(displayName) << SEP
+				<< Quote(moreInfoLink) << SEP
 				<< catalog << SEP
 				<< countCatalogs << SEP
 				<< Quote(catalogFilename) << SEP
@@ -415,6 +419,8 @@ void AnalyzePEFile(tstring filename, _TCHAR* pszCatalogFile, tostream& output, B
 			output << XMLElementSingleLine(4, _TEXT("DEROIDHash"), DEROIDHash) << endl;
 			output << _TEXT("    <validSignature>") << signature << _TEXT("</validSignature>") << endl;
 			output << XMLElementSingleLine(4, _TEXT("errorCode"), MyFormatMessage(errorCode)) << endl;
+			output << XMLElementSingleLine(4, _TEXT("displayName"), displayName) << endl;
+			output << XMLElementSingleLine(4, _TEXT("moreInfoLink"), moreInfoLink) << endl;
 			output << _TEXT("    <catalog>") << catalog << _TEXT("</catalog>") << endl;
 			output << _TEXT("    <countCatalogs>") << countCatalogs << _TEXT("</countCatalogs>") << endl;
 			output << XMLElementSingleLine(4, _TEXT("catalogFilename"), catalogFilename) << endl;
@@ -530,6 +536,8 @@ void AnalyzePEFile(tstring filename, _TCHAR* pszCatalogFile, tostream& output, B
 			output << _TEXT("DEROIDHash:                           ") << DEROIDHash << endl;
 			output << _TEXT("Valid signature:                      ") << signature << endl;
 			output << _TEXT("Error code:                           ") << MyFormatMessage(errorCode) << endl;
+			output << _TEXT("Display name:                         ") << displayName << endl;
+			output << _TEXT("More info:                            ") << moreInfoLink << endl;
 			output << _TEXT("From catalog file:                    ") << catalog << endl;
 			output << _TEXT("Count catalog files:                  ") << countCatalogs << endl;
 			output << _TEXT("Catalog filename:                     ") << catalogFilename << endl;
@@ -1012,6 +1020,8 @@ int _tmain(int argc, _TCHAR* argv[])
 			<< _TEXT("DEROIDHash") << SEP
 			<< _TEXT("Signature") << SEP
 			<< _TEXT("Error_code") << SEP
+			<< _TEXT("Display_name") << SEP
+			<< _TEXT("More_info_link") << SEP
 			<< _TEXT("Catalog") << SEP
 			<< _TEXT("Catalogs") << SEP
 			<< _TEXT("Catalog_Filename") << SEP

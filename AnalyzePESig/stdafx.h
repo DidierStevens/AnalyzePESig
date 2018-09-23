@@ -24,9 +24,10 @@
 #define tstringbuf wstringbuf
 #define to_tstring to_wstring
 #define Utf8LPSTR_to_tstring(p) std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes(p)
+#define LPWSTR_to_tstring(p) wstring(p)
 #define LPWSTR_to_LPTSTR(dst, src) wcscpy_s(dst, src)
 #define LPTSTR_to_wstring(p) wstring(p)
-#else UNICODE
+#else def UNICODE
 #define _O_TTEXT _O_TEXT
 #define TEXT_FILE_CCS ""
 #define tostream ostream
@@ -38,8 +39,9 @@
 #define tstringbuf stringbuf
 #define to_tstring to_string
 #define Utf8LPSTR_to_tstring(p) string(p)
+#define LPWSTR_to_tstring(p) std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().to_bytes(wstring(p))
 #define LPWSTR_to_LPTSTR(dst, src) { size_t stDummy; wcstombs_s(&stDummy, dst, src, ARRAYSIZE(dst)); }
 #define LPTSTR_to_wstring(p) std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes(p)
-#endif UNICODE
+#endif def UNICODE
 
 #include "AnalysisFunctions.h"

@@ -529,7 +529,7 @@ BOOL CalculateHashOfBytes(ALG_ID Algid, BYTE *pbBinary, DWORD dwBinary, tstring&
 //    return bResult;
 //}
 
-#define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
+#define CERT_ENCODINGS (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 
 void GetChainHashAlgorithms(PCCERT_CONTEXT pCertContext)
 {
@@ -562,7 +562,7 @@ BOOL GetTimeStampSignerInfo(PCMSG_SIGNER_INFO pSignerInfo, PCMSG_SIGNER_INFO *pC
 			if (lstrcmpA(pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId, szOID_RSA_counterSign) == 0)
             {
 				// Get size of CMSG_SIGNER_INFO structure.
-                fResult = CryptDecodeObject(ENCODING,
+                fResult = CryptDecodeObject(CERT_ENCODINGS,
                            PKCS7_SIGNER_INFO,
                            pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
                            pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
@@ -585,7 +585,7 @@ BOOL GetTimeStampSignerInfo(PCMSG_SIGNER_INFO pSignerInfo, PCMSG_SIGNER_INFO *pC
 
                 // Decode and get CMSG_SIGNER_INFO structure
                 // for timestamp certificate.
-                fResult = CryptDecodeObject(ENCODING,
+                fResult = CryptDecodeObject(CERT_ENCODINGS,
                            PKCS7_SIGNER_INFO,
                            pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
                            pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
@@ -629,7 +629,7 @@ BOOL GetDateOfTimeStamp(PCMSG_SIGNER_INFO pSignerInfo, SYSTEMTIME *st)
         {               
             // Decode and get FILETIME structure.
             dwData = sizeof(ft);
-            fResult = CryptDecodeObject(ENCODING,
+            fResult = CryptDecodeObject(CERT_ENCODINGS,
                         szOID_RSA_signingTime,
                         pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData,
                         pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData,
@@ -905,6 +905,9 @@ bool GetSignerCertificateInfo(LPCWSTR filename, tstring& issuerName, tstring& su
 	else
 		countersignTimestamp = GetGeneralizedTimeStampSignerInfo(pSignerInfo);
 
+	if (pCounterSignerInfo)
+		LocalFree(pCounterSignerInfo);
+
 	if (!strcmp(pSignerInfo->HashAlgorithm.pszObjId, szOID_OIWSEC_sha1))
 		signatureHashAlgorithm = _TEXT("SHA1");
 	else if (!strcmp(pSignerInfo->HashAlgorithm.pszObjId, szOID_RSA_MD5))
@@ -919,7 +922,7 @@ bool GetSignerCertificateInfo(LPCWSTR filename, tstring& issuerName, tstring& su
     CertInfo.Issuer = pSignerInfo->Issuer;
     CertInfo.SerialNumber = pSignerInfo->SerialNumber;
 
-    pCertContext = CertFindCertificateInStore(hStore, ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID) &CertInfo, NULL);
+    pCertContext = CertFindCertificateInStore(hStore, CERT_ENCODINGS, 0, CERT_FIND_SUBJECT_CERT, (PVOID) &CertInfo, NULL);
 
     if (!pCertContext)
     {
@@ -1065,7 +1068,7 @@ void DumpExtensions(PCERT_INFO pCertInfo, list<tstring>& extensions)
 	}
 }
 
-void GetFileSigner(HANDLE hStateData, tstring& signatureTimestamp, list<tstring>& subjectNameChain, list<tstring>& signatureHashAlgorithmChain, list<tstring>& serialChain, list<tstring>& thumbprintChain, list<int>& keylengthChain, list<list<tstring>>& extensionsChain, list<int>& issuerUniqueIdChain, list<int>& subjectUniqueIdChain, list<tstring>& notBeforeChain, list<tstring>& notAfterChain)
+void GetFileSigner(HANDLE hStateData, tstring &displayName, tstring &moreInfoLink, tstring& signatureTimestamp, list<tstring>& subjectNameChain, list<tstring>& signatureHashAlgorithmChain, list<tstring>& serialChain, list<tstring>& thumbprintChain, list<int>& keylengthChain, list<list<tstring>>& extensionsChain, list<int>& issuerUniqueIdChain, list<int>& subjectUniqueIdChain, list<tstring>& notBeforeChain, list<tstring>& notAfterChain)
 {
 	CRYPT_PROVIDER_DATA *ProviderData;
 	list<tstring> extensions;
@@ -1094,6 +1097,64 @@ void GetFileSigner(HANDLE hStateData, tstring& signatureTimestamp, list<tstring>
 
 		if (SignerData)
 		{
+			// get the opus info
+			auto pSignerInfo = SignerData->psSigner;
+			if (pSignerInfo)
+				for (DWORD i = 0; i < pSignerInfo->AuthAttrs.cAttr; i++)
+				{
+					if (!strcmp(SPC_SP_OPUS_INFO_OBJID, pSignerInfo->AuthAttrs.rgAttr[i].pszObjId) &&
+						pSignerInfo->AuthAttrs.rgAttr[i].cValue > 0)
+					{
+						DWORD dwData = 0;
+
+						BOOL fRes = CryptDecodeObject(CERT_ENCODINGS,
+							SPC_SP_OPUS_INFO_OBJID,
+							pSignerInfo->AuthAttrs.rgAttr[i].rgValue[0].pbData,
+							pSignerInfo->AuthAttrs.rgAttr[i].rgValue[0].cbData,
+							0,
+							NULL,
+							&dwData);
+						if (fRes && dwData > 0)
+						{
+							PSPC_SP_OPUS_INFO opusinfo = (PSPC_SP_OPUS_INFO)LocalAlloc(LPTR, dwData);
+							if (opusinfo)
+							{
+								fRes = CryptDecodeObject(CERT_ENCODINGS,
+									SPC_SP_OPUS_INFO_OBJID,
+									pSignerInfo->AuthAttrs.rgAttr[i].rgValue[0].pbData,
+									pSignerInfo->AuthAttrs.rgAttr[i].rgValue[0].cbData,
+									0,
+									opusinfo,
+									&dwData);
+								if (fRes)
+								{
+									// Get the display name.
+									if (opusinfo->pwszProgramName)
+									{
+										displayName = LPWSTR_to_tstring(opusinfo->pwszProgramName);
+									}
+
+									// Get the "more info" link
+									if (opusinfo->pMoreInfo)
+									{
+										switch (opusinfo->pMoreInfo->dwLinkChoice)
+										{
+										case SPC_URL_LINK_CHOICE:
+											moreInfoLink = LPWSTR_to_tstring(opusinfo->pMoreInfo->pwszUrl);
+										case SPC_FILE_LINK_CHOICE:
+											moreInfoLink = LPWSTR_to_tstring(opusinfo->pMoreInfo->pwszFile);
+										}
+									}
+								}
+
+								LocalFree(opusinfo);
+							}
+						}
+
+						break;
+					}
+				}
+
 			CRYPT_PROVIDER_CERT *CertChain;
 			TCHAR NameBuffer[0x400];
 			BYTE abSerial[0x400];
@@ -1221,7 +1282,7 @@ void GetFileSigner(HANDLE hStateData, tstring& signatureTimestamp, list<tstring>
 }
 
 // http://forum.sysinternals.com/howto-verify-the-digital-signature-of-a-file_topic19247.html
-BOOL IsFileDigitallySigned(LPCWSTR FilePath, BOOL bNoRevocation, LPCWSTR CatalogFile, int& catalog, unsigned int& uiCountCatalogContexts, tstring& catalogFilename, tstring& issuerName, tstring& subjectName, tstring& signatureHashAlgorithm, tstring& signatureTimestamp, tstring& countersignTimestamp, list<tstring>& subjectNameChain, list<tstring>& signatureHashAlgorithmChain, list<tstring>& serialChain, list<tstring>& thumbprintChain, list<int>& keylengthChain, list<list<tstring>>& extensionsChain, list<int>& issuerUniqueIdChain, list<int>& subjectUniqueIdChain, list<tstring>& notBeforeChain, list<tstring>& notAfterChain, long& lError)
+BOOL IsFileDigitallySigned(LPCWSTR FilePath, tstring &displayName, tstring &moreInfoLink, BOOL bNoRevocation, LPCWSTR CatalogFile, int& catalog, unsigned int& uiCountCatalogContexts, tstring& catalogFilename, tstring& issuerName, tstring& subjectName, tstring& signatureHashAlgorithm, tstring& signatureTimestamp, tstring& countersignTimestamp, list<tstring>& subjectNameChain, list<tstring>& signatureHashAlgorithmChain, list<tstring>& serialChain, list<tstring>& thumbprintChain, list<int>& keylengthChain, list<list<tstring>>& extensionsChain, list<int>& issuerUniqueIdChain, list<int>& subjectUniqueIdChain, list<tstring>& notBeforeChain, list<tstring>& notAfterChain, long& lError)
 {
 	//Author: AD, 2009
 	PVOID Context;
@@ -1399,7 +1460,7 @@ BOOL IsFileDigitallySigned(LPCWSTR FilePath, BOOL bNoRevocation, LPCWSTR Catalog
 	if (CatalogContext)
 		CryptCATAdminReleaseCatalogContext(Context, CatalogContext, 0);
 
-	GetFileSigner(WintrustStructure.hWVTStateData, signatureTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionsChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain);
+	GetFileSigner(WintrustStructure.hWVTStateData, displayName, moreInfoLink, signatureTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionsChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain);
 
 	//If we successfully verified, we need to free.
 	if (ReturnFlag)
