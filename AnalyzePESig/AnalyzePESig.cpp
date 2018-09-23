@@ -404,7 +404,7 @@ void AnalyzePEFile(tstring filename, _TCHAR* pszCatalogFile, tostream& output, B
 			output << XMLElementSingleLine(4, _TEXT("errorCode"), MyFormatMessage(errorCode)) << endl;
 			output << _TEXT("    <catalog>") << catalog << _TEXT("</catalog>") << endl;
 			output << _TEXT("    <countCatalogs>") << countCatalogs << _TEXT("</countCatalogs>") << endl;
-			output << XMLElementSingleLine(4, _TEXT("catalogFilename"), issuerName) << endl;
+			output << XMLElementSingleLine(4, _TEXT("catalogFilename"), catalogFilename) << endl;
 			output << XMLElementSingleLine(4, _TEXT("issuerName"), issuerName) << endl;
 			output << XMLElementSingleLine(4, _TEXT("subjectName"), subjectName) << endl;
 			output << XMLElementSingleLine(4, _TEXT("subjectThumbprint"), (thumbprintChain.empty() ? _TEXT("") : thumbprintChain.front())) << endl;
