@@ -20,15 +20,15 @@
 
 using namespace std;
 
-string MyFormatMessage(DWORD);
-BOOL CalculateMD5OfFile(string, string&, double&, string&);
-BOOL GetVersionInfo(LPCSTR, string&, string&, string&, string&);
-BOOL IsFileDigitallySigned(LPCWSTR, BOOL, LPCWSTR, int&, unsigned int&, string&, string&, string&, string&, string&, string&, list<string>&, list<string>&, list<string>&, list<string>&, list <int>&, list<list<string>>&, list <int>&, list <int>&, list<string>&, list<string>&, long&);
-BOOL GetFileInfo(string, string&, string&, string&, string&, DWORD&, unsigned int&, list<string>&, unsigned int&, unsigned int&, unsigned int&, unsigned int&, unsigned int&, string&, DWORD&, DWORD&, WORD&, WORD&, DWORD&, BOOL&, DWORD&, DWORD&, DWORD&, string&, DWORD&, string&, string&, string&);
+tstring MyFormatMessage(DWORD);
+BOOL CalculateMD5OfFile(tstring, tstring&, double&, tstring&);
+BOOL GetVersionInfo(LPCTSTR, tstring&, tstring&, tstring&, tstring&);
+BOOL IsFileDigitallySigned(LPCWSTR, tstring&, tstring&, BOOL, LPCWSTR, int&, unsigned int&, tstring&, tstring&, tstring&, tstring&, tstring&, tstring&, list<tstring>&, list<tstring>&, list<tstring>&, list<tstring>&, list <int>&, list<list<tstring>>&, list <int>&, list <int>&, list<tstring>&, list<tstring>&, long&);
+BOOL GetFileInfo(tstring, tstring&, tstring&, tstring&, tstring&, DWORD&, unsigned int&, list<tstring>&, unsigned int&, unsigned int&, unsigned int&, unsigned int&, unsigned int&, tstring&, DWORD&, DWORD&, WORD&, WORD&, DWORD&, BOOL&, DWORD&, DWORD&, DWORD&, tstring&, DWORD&, tstring&, tstring&, tstring&);
 BOOL IsPEFile(_TCHAR*);
-BOOL GetFileSecurityInfo(string, LPTSTR, ACCESS_MASK&);
-list<string> DisplayAccessMask(ACCESS_MASK);
-BOOL GetUserFromProcess(const DWORD procId, string& user, string& domain);
+BOOL GetFileSecurityInfo(tstring, LPTSTR, ACCESS_MASK&);
+list<tstring> DisplayAccessMask(ACCESS_MASK);
+BOOL GetUserFromProcess(const DWORD procId, tstring& user, tstring& domain);
 
 #pragma comment(lib, "authz.lib")
 

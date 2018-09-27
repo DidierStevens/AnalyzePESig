@@ -4,22 +4,24 @@
 #pragma comment(lib, "crypt32.lib")
 #pragma comment(lib, "Version.lib")
 
-string MyFormatMessage(DWORD dwError)
+const TCHAR rgbDigits[] = TEXT("0123456789abcdef");
+
+tstring MyFormatMessage(DWORD dwError)
 {
 	HLOCAL hlErrorMessage = NULL;
-	string message;
+	tstring message;
 
 	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL, dwError, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), (PTSTR) &hlErrorMessage, 0, NULL);
 	if (NULL != hlErrorMessage)
 	{
-		message = string((TCHAR *) LocalLock(hlErrorMessage));
+		message = tstring((TCHAR *) LocalLock(hlErrorMessage));
 		message.erase(message.find_last_not_of(TEXT(" \n\r\t")) + 1);
 		LocalFree(hlErrorMessage);
 	}
 	else
-		message = "";
+		message = TEXT("");
 
-	return std::to_string((long long)dwError) + TEXT(" ") + message;
+	return std::to_tstring((long long)dwError) + TEXT(" ") + message;
 }
 
 int IsCharacterToStrip(int character)
@@ -27,7 +29,7 @@ int IsCharacterToStrip(int character)
 	return 0 == character || '\t' == character || '\n' == character || '\r' == character;
 }
 
-void StripString(string& stringArg)
+void StripString(tstring& stringArg)
 {
 	stringArg.erase(remove_if(stringArg.begin(), stringArg.end(), IsCharacterToStrip), stringArg.end());
 }
@@ -58,7 +60,7 @@ double CalculateEntropy(BYTE *pbBuffer, SIZE_T sSize)
 	return dEntropy;
 }
 
-string TimeToString(FILETIME *pftIn)
+tstring TimeToString(FILETIME *pftIn)
 {
 //	FILETIME localFt;
 	SYSTEMTIME st;
@@ -68,10 +70,10 @@ string TimeToString(FILETIME *pftIn)
 //	FileTimeToSystemTime(&localFt, &st);
 	FileTimeToSystemTime(pftIn, &st);
 	_sntprintf_s(szBuffer, 256, _TEXT("%04d/%02d/%02d %02d:%02d:%02d"), st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
-	return string(szBuffer);
+	return tstring(szBuffer);
 }
 
-void GetFileTimes(HANDLE hFile, string& creationtime, string& lastwritetime, string& lastaccesstime)
+void GetFileTimes(HANDLE hFile, tstring& creationtime, tstring& lastwritetime, tstring& lastaccesstime)
 {
 	FILETIME ftCreation;
 	FILETIME ftLastWrite;
@@ -85,14 +87,14 @@ void GetFileTimes(HANDLE hFile, string& creationtime, string& lastwritetime, str
 	}
 	else
 	{
-		creationtime = "";
-		lastwritetime = "";
-		lastaccesstime = "";
+		creationtime = _T("");
+		lastwritetime = _T("");
+		lastaccesstime = _T("");
 	}
 }
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/aa446629%28v=vs.85%29.aspx
-void GetOwnerName(HANDLE hFile, string& ownername)
+void GetOwnerName(HANDLE hFile, tstring& ownername)
 {
 	DWORD dwRtnCode = 0;
 	PSID pSidOwner = NULL;
@@ -103,7 +105,7 @@ void GetOwnerName(HANDLE hFile, string& ownername)
 	SID_NAME_USE eUse = SidTypeUnknown;
 	PSECURITY_DESCRIPTOR pSD = NULL;
 
-	ownername = string(TEXT(""));
+	ownername = tstring(TEXT(""));
 
 	// Get the owner SID of the file.
 	dwRtnCode = GetSecurityInfo(
@@ -158,13 +160,13 @@ void GetOwnerName(HANDLE hFile, string& ownername)
 
 	// Check GetLastError for LookupAccountSid error condition.
 	if (bRtnBool == TRUE)
-		ownername = string(DomainName) + string(TEXT("\\")) + string(AcctName);
+		ownername = tstring(DomainName) + tstring(TEXT("\\")) + tstring(AcctName);
 
 	GlobalFree(DomainName);
 	GlobalFree(AcctName);
 }
 
-BOOL CalculateMD5OfFile(string filename, string& md5, double& dEntropy, string& error)
+BOOL CalculateMD5OfFile(tstring filename, tstring& md5, double& dEntropy, tstring& error)
 {
     DWORD dwLastError = 0;
     BOOL bResult = FALSE;
@@ -175,7 +177,6 @@ BOOL CalculateMD5OfFile(string filename, string& md5, double& dEntropy, string& 
     DWORD cbRead = 0;
     BYTE rgbHash[MD5LEN];
     DWORD cbHash = 0;
-	CHAR rgbDigits[] = TEXT("0123456789abcdef");
 	BYTE *pbIter;
 	SIZE_T asPrevelance[256];
 	double dPrevalence;
@@ -251,8 +252,8 @@ BOOL CalculateMD5OfFile(string filename, string& md5, double& dEntropy, string& 
 			dEntropy += - dPrevalence * log10(dPrevalence) / log10(2.0);
 		}
 
-	string md5Hash;
-	char hexbyte[3];
+	tstring md5Hash;
+	TCHAR hexbyte[3];
 
     cbHash = MD5LEN;
 	hexbyte[2] = '\0';
@@ -286,7 +287,7 @@ BOOL CalculateMD5OfFile(string filename, string& md5, double& dEntropy, string& 
 
 #define SHA1LEN  20
 
-BOOL CalculateHashOfBytes(ALG_ID Algid, BYTE *pbBinary, DWORD dwBinary, string& hash, string& error)
+BOOL CalculateHashOfBytes(ALG_ID Algid, BYTE *pbBinary, DWORD dwBinary, tstring& hash, tstring& error)
 {
     DWORD dwLastError = 0;
     BOOL bResult = FALSE;
@@ -294,9 +295,8 @@ BOOL CalculateHashOfBytes(ALG_ID Algid, BYTE *pbBinary, DWORD dwBinary, string& 
     HCRYPTHASH hHash = 0;
     BYTE rgbHash[SHA1LEN];
     DWORD cbHash = 0;
-	CHAR rgbDigits[] = TEXT("0123456789abcdef");
-	string calculatedHash;
-	char hexbyte[3];
+	tstring calculatedHash;
+	TCHAR hexbyte[3];
 
     if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
     {
@@ -529,7 +529,7 @@ BOOL CalculateHashOfBytes(ALG_ID Algid, BYTE *pbBinary, DWORD dwBinary, string& 
 //    return bResult;
 //}
 
-#define ENCODING (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
+#define CERT_ENCODINGS (X509_ASN_ENCODING | PKCS_7_ASN_ENCODING)
 
 void GetChainHashAlgorithms(PCCERT_CONTEXT pCertContext)
 {
@@ -562,7 +562,7 @@ BOOL GetTimeStampSignerInfo(PCMSG_SIGNER_INFO pSignerInfo, PCMSG_SIGNER_INFO *pC
 			if (lstrcmpA(pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId, szOID_RSA_counterSign) == 0)
             {
 				// Get size of CMSG_SIGNER_INFO structure.
-                fResult = CryptDecodeObject(ENCODING,
+                fResult = CryptDecodeObject(CERT_ENCODINGS,
                            PKCS7_SIGNER_INFO,
                            pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
                            pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
@@ -585,7 +585,7 @@ BOOL GetTimeStampSignerInfo(PCMSG_SIGNER_INFO pSignerInfo, PCMSG_SIGNER_INFO *pC
 
                 // Decode and get CMSG_SIGNER_INFO structure
                 // for timestamp certificate.
-                fResult = CryptDecodeObject(ENCODING,
+                fResult = CryptDecodeObject(CERT_ENCODINGS,
                            PKCS7_SIGNER_INFO,
                            pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData,
                            pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData,
@@ -629,7 +629,7 @@ BOOL GetDateOfTimeStamp(PCMSG_SIGNER_INFO pSignerInfo, SYSTEMTIME *st)
         {               
             // Decode and get FILETIME structure.
             dwData = sizeof(ft);
-            fResult = CryptDecodeObject(ENCODING,
+            fResult = CryptDecodeObject(CERT_ENCODINGS,
                         szOID_RSA_signingTime,
                         pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].pbData,
                         pSignerInfo->AuthAttrs.rgAttr[n].rgValue[0].cbData,
@@ -724,7 +724,7 @@ BOOL ParseDERFindType(int iTypeSearch, PBYTE pbSignature, DWORD dwSize, DWORD& d
 
 		ParseDERType(pbSignature[dwPosition], iType, iClass);
 #ifdef _DEBUG
-		printf("<ParseDER %d %02x>\n", iClass, iType);
+		_tprintf(_T("<ParseDER %d %02x>\n"), iClass, iType);
 #endif
 		switch (iType)
 		{
@@ -748,8 +748,8 @@ BOOL ParseDERFindType(int iTypeSearch, PBYTE pbSignature, DWORD dwSize, DWORD& d
 			}
 #ifdef _DEBUG
 			for (int iIter = 0; iIter < pbSignature[dwPosition]; iIter++)
-				printf("%02X ", pbSignature[dwPosition + 1 + iIter]);
-			printf("\n");
+				_tprintf(_T("%02X "), pbSignature[dwPosition + 1 + iIter]);
+			_tprintf(_T("\n"));
 #endif
 			dwPosition += 1 + pbSignature[dwPosition];
 			break;
@@ -808,7 +808,7 @@ BOOL ParseDERFindType(int iTypeSearch, PBYTE pbSignature, DWORD dwSize, DWORD& d
 			break;
 		default:
 #ifdef _DEBUG
-			printf("<ParseDER %d %02x %d>\n", iClass, iType, dwPosition);
+			_tprintf(_T("<ParseDER %d %02x %d>\n"), iClass, iType, dwPosition);
 #endif
 			dwPositionError = dwPosition;
 			iTypeError = iType;
@@ -819,7 +819,7 @@ BOOL ParseDERFindType(int iTypeSearch, PBYTE pbSignature, DWORD dwSize, DWORD& d
 	return FALSE;
 }
 
-string GetGeneralizedTimeStampSignerInfo(PCMSG_SIGNER_INFO pSignerInfo)
+tstring GetGeneralizedTimeStampSignerInfo(PCMSG_SIGNER_INFO pSignerInfo)
 {
 	DWORD dwPositionFound;
 	DWORD dwLengthFound;
@@ -828,27 +828,28 @@ string GetGeneralizedTimeStampSignerInfo(PCMSG_SIGNER_INFO pSignerInfo)
 
 	for (DWORD n = 0; n < pSignerInfo->UnauthAttrs.cAttr; n++)
 	{
-		if (lstrcmpA(pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId, szOID_RFC3161_counterSign) == 0)
+		if (!strcmp(pSignerInfo->UnauthAttrs.rgAttr[n].pszObjId, szOID_RFC3161_counterSign) &&
+			pSignerInfo->UnauthAttrs.rgAttr[n].cValue > 0)
 		{
 			if (ParseDERFindType(0x04, pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData, pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].cbData, dwPositionFound, dwLengthFound, dwPositionError, iTypeError))
 			{
 				PBYTE pbOctetString = &(pSignerInfo->UnauthAttrs.rgAttr[n].rgValue[0].pbData[dwPositionFound]);
 				if (ParseDERFindType(0x18, pbOctetString, dwLengthFound, dwPositionFound, dwLengthFound, dwPositionError, iTypeError))
 				{
-					_TCHAR szBuffer[256];
+					char szBuffer[256];
 
-					_tcsncpy_s(szBuffer, (_TCHAR*)&(pbOctetString[dwPositionFound]), dwLengthFound);
+					strncpy_s(szBuffer, (LPCSTR)&(pbOctetString[dwPositionFound]), dwLengthFound);
 					szBuffer[dwLengthFound] = 0;
-					return string(szBuffer);
+					return Utf8LPSTR_to_tstring(szBuffer);
 				}
 			}
 		}
 	}
 
-	return string(TEXT(""));
+	return tstring(TEXT(""));
 }
 
-bool GetSignerCertificateInfo(LPCWSTR filename, string& issuerName, string& subjectName, string& signatureHashAlgorithm, string& countersignTimestamp)
+bool GetSignerCertificateInfo(LPCWSTR filename, tstring& issuerName, tstring& subjectName, tstring& signatureHashAlgorithm, tstring& countersignTimestamp)
 {
     HCERTSTORE hStore = NULL;
     HCRYPTMSG hMsg = NULL; 
@@ -889,7 +890,7 @@ bool GetSignerCertificateInfo(LPCWSTR filename, string& issuerName, string& subj
 		return FALSE;
 	}
 
-	countersignTimestamp = string(_TEXT(""));
+	countersignTimestamp = tstring(_TEXT(""));
 	if (GetTimeStampSignerInfo(pSignerInfo, &pCounterSignerInfo))
 	{
 		SYSTEMTIME st;
@@ -898,11 +899,14 @@ bool GetSignerCertificateInfo(LPCWSTR filename, string& issuerName, string& subj
 		if (GetDateOfTimeStamp(pCounterSignerInfo, &st))
 		{
 			_sntprintf_s(szBuffer, 256, _TEXT("%04d/%02d/%02d %02d:%02d:%02d"), st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
-			countersignTimestamp = string(szBuffer);
+			countersignTimestamp = tstring(szBuffer);
 		}
 	}
 	else
 		countersignTimestamp = GetGeneralizedTimeStampSignerInfo(pSignerInfo);
+
+	if (pCounterSignerInfo)
+		LocalFree(pCounterSignerInfo);
 
 	if (!strcmp(pSignerInfo->HashAlgorithm.pszObjId, szOID_OIWSEC_sha1))
 		signatureHashAlgorithm = _TEXT("SHA1");
@@ -912,13 +916,13 @@ bool GetSignerCertificateInfo(LPCWSTR filename, string& issuerName, string& subj
 		signatureHashAlgorithm = _TEXT("SHA256");
 	else
 //		signatureHashAlgorithm = pSignerInfo->HashAlgorithm.pszObjId; //a// _TEXT
-		signatureHashAlgorithm = string(pSignerInfo->HashAlgorithm.pszObjId);
+		signatureHashAlgorithm = Utf8LPSTR_to_tstring(pSignerInfo->HashAlgorithm.pszObjId);
 	StripString(signatureHashAlgorithm);
 
     CertInfo.Issuer = pSignerInfo->Issuer;
     CertInfo.SerialNumber = pSignerInfo->SerialNumber;
 
-    pCertContext = CertFindCertificateInStore(hStore, ENCODING, 0, CERT_FIND_SUBJECT_CERT, (PVOID) &CertInfo, NULL);
+    pCertContext = CertFindCertificateInStore(hStore, CERT_ENCODINGS, 0, CERT_FIND_SUBJECT_CERT, (PVOID) &CertInfo, NULL);
 
     if (!pCertContext)
     {
@@ -954,7 +958,7 @@ bool GetSignerCertificateInfo(LPCWSTR filename, string& issuerName, string& subj
 		return FALSE;
     }
 
-	issuerName = string(szName);
+	issuerName = tstring(szName);
 	StripString(issuerName);
 
     LocalFree(szName);
@@ -988,7 +992,7 @@ bool GetSignerCertificateInfo(LPCWSTR filename, string& issuerName, string& subj
 		return FALSE;
     }
 
-	subjectName = string(szName);
+	subjectName = tstring(szName);
 	StripString(subjectName);
 
 	GetChainHashAlgorithms(pCertContext);
@@ -1053,25 +1057,25 @@ int ExtractKeyLength(BYTE *pbBinary, DWORD dwBinary)
 		return iKeylength * 8;
 }
 
-void DumpExtensions(PCERT_INFO pCertInfo, list<string>& extensions)
+void DumpExtensions(PCERT_INFO pCertInfo, list<tstring>& extensions)
 {
 	DWORD dwIter;
 
 	extensions.clear();
 	for (dwIter = 0; dwIter < pCertInfo->cExtension; dwIter++)
 	{
-		extensions.push_back(string(pCertInfo->rgExtension[dwIter].pszObjId) + (pCertInfo->rgExtension[dwIter].fCritical ? "C" : ""));
+		extensions.push_back(Utf8LPSTR_to_tstring(pCertInfo->rgExtension[dwIter].pszObjId) + (pCertInfo->rgExtension[dwIter].fCritical ? _T("C") : _T("")));
 	}
 }
 
-void GetFileSigner(HANDLE hStateData, string& signatureTimestamp, list<string>& subjectNameChain, list<string>& signatureHashAlgorithmChain, list<string>& serialChain, list<string>& thumbprintChain, list<int>& keylengthChain, list<list<string>>& extensionsChain, list<int>& issuerUniqueIdChain, list<int>& subjectUniqueIdChain, list<string>& notBeforeChain, list<string>& notAfterChain)
+void GetFileSigner(HANDLE hStateData, tstring &displayName, tstring &moreInfoLink, tstring& signatureTimestamp, list<tstring>& subjectNameChain, list<tstring>& signatureHashAlgorithmChain, list<tstring>& serialChain, list<tstring>& thumbprintChain, list<int>& keylengthChain, list<list<tstring>>& extensionsChain, list<int>& issuerUniqueIdChain, list<int>& subjectUniqueIdChain, list<tstring>& notBeforeChain, list<tstring>& notAfterChain)
 {
 	CRYPT_PROVIDER_DATA *ProviderData;
-	list<string> extensions;
+	list<tstring> extensions;
 //	_TCHAR szID[1024];
 //	_TCHAR szHex[10];
 
-	signatureTimestamp = string(_TEXT(""));
+	signatureTimestamp = tstring(_TEXT(""));
 	subjectNameChain.clear();
 	signatureHashAlgorithmChain.clear();
 	serialChain.clear();
@@ -1093,8 +1097,66 @@ void GetFileSigner(HANDLE hStateData, string& signatureTimestamp, list<string>& 
 
 		if (SignerData)
 		{
+			// get the opus info
+			auto pSignerInfo = SignerData->psSigner;
+			if (pSignerInfo)
+				for (DWORD i = 0; i < pSignerInfo->AuthAttrs.cAttr; i++)
+				{
+					if (!strcmp(SPC_SP_OPUS_INFO_OBJID, pSignerInfo->AuthAttrs.rgAttr[i].pszObjId) &&
+						pSignerInfo->AuthAttrs.rgAttr[i].cValue > 0)
+					{
+						DWORD dwData = 0;
+
+						BOOL fRes = CryptDecodeObject(CERT_ENCODINGS,
+							SPC_SP_OPUS_INFO_OBJID,
+							pSignerInfo->AuthAttrs.rgAttr[i].rgValue[0].pbData,
+							pSignerInfo->AuthAttrs.rgAttr[i].rgValue[0].cbData,
+							0,
+							NULL,
+							&dwData);
+						if (fRes && dwData > 0)
+						{
+							PSPC_SP_OPUS_INFO opusinfo = (PSPC_SP_OPUS_INFO)LocalAlloc(LPTR, dwData);
+							if (opusinfo)
+							{
+								fRes = CryptDecodeObject(CERT_ENCODINGS,
+									SPC_SP_OPUS_INFO_OBJID,
+									pSignerInfo->AuthAttrs.rgAttr[i].rgValue[0].pbData,
+									pSignerInfo->AuthAttrs.rgAttr[i].rgValue[0].cbData,
+									0,
+									opusinfo,
+									&dwData);
+								if (fRes)
+								{
+									// Get the display name.
+									if (opusinfo->pwszProgramName)
+									{
+										displayName = LPWSTR_to_tstring(opusinfo->pwszProgramName);
+									}
+
+									// Get the "more info" link
+									if (opusinfo->pMoreInfo)
+									{
+										switch (opusinfo->pMoreInfo->dwLinkChoice)
+										{
+										case SPC_URL_LINK_CHOICE:
+											moreInfoLink = LPWSTR_to_tstring(opusinfo->pMoreInfo->pwszUrl);
+										case SPC_FILE_LINK_CHOICE:
+											moreInfoLink = LPWSTR_to_tstring(opusinfo->pMoreInfo->pwszFile);
+										}
+									}
+								}
+
+								LocalFree(opusinfo);
+							}
+						}
+
+						break;
+					}
+				}
+
 			CRYPT_PROVIDER_CERT *CertChain;
-			CHAR NameBuffer[0x400];
+			TCHAR NameBuffer[0x400];
 			BYTE abSerial[0x400];
 			DWORD CertCounter = 0;
 			DWORD dwSize;
@@ -1105,7 +1167,7 @@ void GetFileSigner(HANDLE hStateData, string& signatureTimestamp, list<string>& 
 			FileTimeToLocalFileTime(&SignerData->sftVerifyAsOf, &localFt);
 			FileTimeToSystemTime(&localFt, &st);
 			_sntprintf_s(szBuffer, 256, _TEXT("%04d/%02d/%02d %02d:%02d:%02d"), st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
-			signatureTimestamp = string(szBuffer);
+			signatureTimestamp = tstring(szBuffer);
 
 			//OK, we got stuff!
 			CertChain = SignerData->pasCertChain;
@@ -1122,23 +1184,23 @@ void GetFileSigner(HANDLE hStateData, string& signatureTimestamp, list<string>& 
 				//Get name.
 				if (CertNameToStr(X509_ASN_ENCODING, &CertChain->pCert->pCertInfo->Subject, CERT_X500_NAME_STR, NameBuffer, 0x400))
 				{
-					string temp(NameBuffer);
+					tstring temp(NameBuffer);
 					StripString(temp);
 					subjectNameChain.push_back(temp);
 					if (!strcmp(CertChain->pCert->pCertInfo->SignatureAlgorithm.pszObjId, szOID_RSA_SHA1RSA))
-						temp = string(_TEXT("sha1RSA(RSA)"));
+						temp = tstring(_TEXT("sha1RSA(RSA)"));
 					else if (!strcmp(CertChain->pCert->pCertInfo->SignatureAlgorithm.pszObjId, szOID_OIWSEC_sha1RSASign))
-						temp = string(_TEXT("sha1RSA(OIW)"));
+						temp = tstring(_TEXT("sha1RSA(OIW)"));
 					else if (!strcmp(CertChain->pCert->pCertInfo->SignatureAlgorithm.pszObjId, szOID_RSA_MD5RSA))
-						temp = string(_TEXT("md5RSA(RSA)"));
+						temp = tstring(_TEXT("md5RSA(RSA)"));
 					else if (!strcmp(CertChain->pCert->pCertInfo->SignatureAlgorithm.pszObjId, szOID_OIWSEC_md5RSA))
-						temp = string(_TEXT("md5RSA(OIW)"));
+						temp = tstring(_TEXT("md5RSA(OIW)"));
 					else if (!strcmp(CertChain->pCert->pCertInfo->SignatureAlgorithm.pszObjId, szOID_RSA_MD2RSA))
-						temp = string(_TEXT("md2RSA(RSA)"));
+						temp = tstring(_TEXT("md2RSA(RSA)"));
 					else if (!strcmp(CertChain->pCert->pCertInfo->SignatureAlgorithm.pszObjId, szOID_RSA_SHA256RSA))
-						temp = string(_TEXT("sha256RSA(RSA)"));
+						temp = tstring(_TEXT("sha256RSA(RSA)"));
 					else
-						temp = string(CertChain->pCert->pCertInfo->SignatureAlgorithm.pszObjId);
+						temp = Utf8LPSTR_to_tstring(CertChain->pCert->pCertInfo->SignatureAlgorithm.pszObjId);
 					StripString(temp);
 					signatureHashAlgorithmChain.push_back(temp);
 
@@ -1163,13 +1225,13 @@ void GetFileSigner(HANDLE hStateData, string& signatureTimestamp, list<string>& 
 							if (!isspace(NameBuffer[dwIter1]))
 								NameBuffer[dwIter2++] = NameBuffer[dwIter1];
 						NameBuffer[dwIter2] = '\0';
-						temp = string(NameBuffer);
+						temp = tstring(NameBuffer);
 						StripString(temp);
 						serialChain.push_back(temp);
 					}
 
-					string sha1;
-					string error;
+					tstring sha1;
+					tstring error;
 					if (CalculateHashOfBytes(CALG_SHA1, CertChain->pCert->pbCertEncoded, CertChain->pCert->cbCertEncoded, sha1, error))
 						thumbprintChain.push_back(sha1);
 
@@ -1220,7 +1282,7 @@ void GetFileSigner(HANDLE hStateData, string& signatureTimestamp, list<string>& 
 }
 
 // http://forum.sysinternals.com/howto-verify-the-digital-signature-of-a-file_topic19247.html
-BOOL IsFileDigitallySigned(LPCWSTR FilePath, BOOL bNoRevocation, LPCWSTR CatalogFile, int& catalog, unsigned int& uiCountCatalogContexts, string& catalogFilename, string& issuerName, string& subjectName, string& signatureHashAlgorithm, string& signatureTimestamp, string& countersignTimestamp, list<string>& subjectNameChain, list<string>& signatureHashAlgorithmChain, list<string>& serialChain, list<string>& thumbprintChain, list<int>& keylengthChain, list<list<string>>& extensionsChain, list<int>& issuerUniqueIdChain, list<int>& subjectUniqueIdChain, list<string>& notBeforeChain, list<string>& notAfterChain, long& lError)
+BOOL IsFileDigitallySigned(LPCWSTR FilePath, tstring &displayName, tstring &moreInfoLink, BOOL bNoRevocation, LPCWSTR CatalogFile, int& catalog, unsigned int& uiCountCatalogContexts, tstring& catalogFilename, tstring& issuerName, tstring& subjectName, tstring& signatureHashAlgorithm, tstring& signatureTimestamp, tstring& countersignTimestamp, list<tstring>& subjectNameChain, list<tstring>& signatureHashAlgorithmChain, list<tstring>& serialChain, list<tstring>& thumbprintChain, list<int>& keylengthChain, list<list<tstring>>& extensionsChain, list<int>& issuerUniqueIdChain, list<int>& subjectUniqueIdChain, list<tstring>& notBeforeChain, list<tstring>& notAfterChain, long& lError)
 {
 	//Author: AD, 2009
 	PVOID Context;
@@ -1343,8 +1405,7 @@ BOOL IsFileDigitallySigned(LPCWSTR FilePath, BOOL bNoRevocation, LPCWSTR Catalog
 	}
 	else
 	{
-		CHAR szCatalogFile[MAX_PATH];
-		size_t stDummy;
+		TCHAR szCatalogFile[MAX_PATH];
 
 		//If we get here, we have catalog info!  Verify it.
 		WintrustStructure.pPolicyCallbackData = 0;
@@ -1370,12 +1431,12 @@ BOOL IsFileDigitallySigned(LPCWSTR FilePath, BOOL bNoRevocation, LPCWSTR Catalog
 
 		if (CatalogFile != NULL)
 		{
-			wcstombs_s(&stDummy, szCatalogFile, CatalogFile, MAX_PATH);
+			LPWSTR_to_LPTSTR(szCatalogFile, CatalogFile);
 			uiCountCatalogContexts = 1;
 		}
 		else
-			wcstombs_s(&stDummy, szCatalogFile, InfoStruct.wszCatalogFile, MAX_PATH);
-		catalogFilename = string(szCatalogFile);
+			LPWSTR_to_LPTSTR(szCatalogFile, InfoStruct.wszCatalogFile);
+		catalogFilename = tstring(szCatalogFile);
 	}
 
 	catalog = CatalogContext != NULL || CatalogFile != NULL ? 1 : 0;
@@ -1399,7 +1460,7 @@ BOOL IsFileDigitallySigned(LPCWSTR FilePath, BOOL bNoRevocation, LPCWSTR Catalog
 	if (CatalogContext)
 		CryptCATAdminReleaseCatalogContext(Context, CatalogContext, 0);
 
-	GetFileSigner(WintrustStructure.hWVTStateData, signatureTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionsChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain);
+	GetFileSigner(WintrustStructure.hWVTStateData, displayName, moreInfoLink, signatureTimestamp, subjectNameChain, signatureHashAlgorithmChain, serialChain, thumbprintChain, keylengthChain, extensionsChain, issuerUniqueIdChain, subjectUniqueIdChain, notBeforeChain, notAfterChain);
 
 	//If we successfully verified, we need to free.
 	if (ReturnFlag)
@@ -1417,7 +1478,7 @@ BOOL IsFileDigitallySigned(LPCWSTR FilePath, BOOL bNoRevocation, LPCWSTR Catalog
 	return ReturnFlag;
 }
 
-BOOL GetVersionInfo(LPCSTR szFilename, string& fileDescription, string& companyName, string& fileVersion, string& productVersion)
+BOOL GetVersionInfo(LPCTSTR szFilename, tstring& fileDescription, tstring& companyName, tstring& fileVersion, tstring& productVersion)
 {
 	DWORD dummy;
     DWORD dwSize;
@@ -1451,34 +1512,34 @@ BOOL GetVersionInfo(LPCSTR szFilename, string& fileDescription, string& companyN
 	    return FALSE;
 	if (!VerQueryValue(&data[0], pszDest, &pvVariable, &iVariableLength))
 	    return FALSE;
-	fileDescription = string((TCHAR *)pvVariable, iVariableLength);
+	fileDescription = tstring((TCHAR *)pvVariable, iVariableLength);
 	StripString(fileDescription);
 
 	if (FAILED(StringCchPrintf(pszDest, 256, TEXT("\\StringFileInfo\\%04x%04x\\CompanyName"), lpTranslate[0].wLanguage, lpTranslate[0].wCodePage)))
 	    return FALSE;
 	if (!VerQueryValue(&data[0], pszDest, &pvVariable, &iVariableLength))
 	    return FALSE;
-	companyName = string((TCHAR *)pvVariable, iVariableLength);
+	companyName = tstring((TCHAR *)pvVariable, iVariableLength);
 	StripString(companyName);
 
 	if (FAILED(StringCchPrintf(pszDest, 256, TEXT("\\StringFileInfo\\%04x%04x\\FileVersion"), lpTranslate[0].wLanguage, lpTranslate[0].wCodePage)))
 	    return FALSE;
 	if (!VerQueryValue(&data[0], pszDest, &pvVariable, &iVariableLength))
 	    return FALSE;
-	fileVersion = string((TCHAR *)pvVariable, iVariableLength);
+	fileVersion = tstring((TCHAR *)pvVariable, iVariableLength);
 	StripString(fileVersion);
 
 	if (FAILED(StringCchPrintf(pszDest, 256, TEXT("\\StringFileInfo\\%04x%04x\\ProductVersion"), lpTranslate[0].wLanguage, lpTranslate[0].wCodePage)))
 	    return FALSE;
 	if (!VerQueryValue(&data[0], pszDest, &pvVariable, &iVariableLength))
 	    return FALSE;
-	productVersion = string((TCHAR *)pvVariable, iVariableLength);
+	productVersion = tstring((TCHAR *)pvVariable, iVariableLength);
 	StripString(productVersion);
 
 	return TRUE;
 }
 
-BOOL ReadBytes(HANDLE hFile, LPVOID buffer, DWORD size, string& error)
+BOOL ReadBytes(HANDLE hFile, LPVOID buffer, DWORD size, tstring& error)
 {
 	DWORD bytes;
 	DWORD dwLastError = 0;
@@ -1497,7 +1558,7 @@ BOOL ReadBytes(HANDLE hFile, LPVOID buffer, DWORD size, string& error)
 	return FALSE;
 }
 
-DWORD AbsoluteSeek(HANDLE hFile, DWORD offset, string &error)
+DWORD AbsoluteSeek(HANDLE hFile, DWORD offset, tstring &error)
 {
     DWORD newOffset;
 	DWORD dwLastError = 0;
@@ -1514,7 +1575,7 @@ DWORD AbsoluteSeek(HANDLE hFile, DWORD offset, string &error)
 
 #define MAX_NUMBER_OF_SECTIONS 0x100
 
-BOOL AnalyzeSections(HANDLE hFile, WORD wNumberOfSections, list<string>& sections, DWORD& dwVirtualAddress, DWORD& dwPointerToRawData, string& error)
+BOOL AnalyzeSections(HANDLE hFile, WORD wNumberOfSections, list<tstring>& sections, DWORD& dwVirtualAddress, DWORD& dwPointerToRawData, tstring& error)
 {
 	PIMAGE_SECTION_HEADER pimage_section_header;
     BYTE abBuffer[sizeof(IMAGE_SECTION_HEADER) * MAX_NUMBER_OF_SECTIONS];
@@ -1529,8 +1590,8 @@ BOOL AnalyzeSections(HANDLE hFile, WORD wNumberOfSections, list<string>& section
 	for (wIter = 0; wIter < min(wNumberOfSections, MAX_NUMBER_OF_SECTIONS); wIter++)
 	{
 		pimage_section_header = (PIMAGE_SECTION_HEADER) (abBuffer + wIter * sizeof(IMAGE_SECTION_HEADER));
-		strncpy_s(szBuffer, (CHAR *)pimage_section_header->Name, 8);
-		sections.push_back(szBuffer);
+		strncpy_s(szBuffer, (CHAR *)pimage_section_header->Name, ARRAYSIZE(pimage_section_header->Name));
+		sections.push_back(Utf8LPSTR_to_tstring(szBuffer));
 		if (!strcmp(szBuffer, ".text"))
 		{
 			dwVirtualAddress = pimage_section_header->VirtualAddress;
@@ -1585,7 +1646,7 @@ BOOL ParseDER(PBYTE pbSignature, DWORD dwSize, HCRYPTHASH hHash, DWORD& dwPositi
 
 		ParseDERType(pbSignature[dwPosition], iType, iClass);
 #ifdef _DEBUG
-		printf("<ParseDER %d %02x>\n", iClass, iType);
+		_tprintf(_T("<ParseDER %d %02x>\n"), iClass, iType);
 #endif
 		if (!CryptHashData(hHash, pbSignature + dwPosition, 1, 0))
 		{
@@ -1615,8 +1676,8 @@ BOOL ParseDER(PBYTE pbSignature, DWORD dwSize, HCRYPTHASH hHash, DWORD& dwPositi
 				}
 #ifdef _DEBUG
 				for (int iIter = 0; iIter < pbSignature[dwPosition]; iIter++)
-					printf("%02X ", pbSignature[dwPosition + 1 + iIter]);
-				printf("\n");
+					_tprintf(_T("%02X "), pbSignature[dwPosition + 1 + iIter]);
+				_tprintf(_T("\n"));
 #endif
 				if (!CryptHashData(hHash, pbSignature + dwPosition + 1, pbSignature[dwPosition], 0))
 				{
@@ -1630,7 +1691,7 @@ BOOL ParseDER(PBYTE pbSignature, DWORD dwSize, HCRYPTHASH hHash, DWORD& dwPositi
 			case 0x01: // boolean
 			case 0x02: // integer
 			case 0x03: // bit string
-			case 0x04: // octec string
+			case 0x04: // octet string
 			case 0x0A: // enumerated
 			case 0x0C: // UTF8string
 			case 0x13: // printable string
@@ -1675,7 +1736,7 @@ BOOL ParseDER(PBYTE pbSignature, DWORD dwSize, HCRYPTHASH hHash, DWORD& dwPositi
 				break;
 			default:
 #ifdef _DEBUG
-				printf("<ParseDER %d %02x %d>\n", iClass, iType, dwPosition);
+				_tprintf(_T("<ParseDER %d %02x %d>\n"), iClass, iType, dwPosition);
 #endif
 				dwPositionError = dwPosition;
 				iTypeError = iType;
@@ -1688,15 +1749,14 @@ BOOL ParseDER(PBYTE pbSignature, DWORD dwSize, HCRYPTHASH hHash, DWORD& dwPositi
 
 #define SHA256LEN 32
 
-string CalculateDEROIDHash(PBYTE pbSignature, DWORD dwSize)
+tstring CalculateDEROIDHash(PBYTE pbSignature, DWORD dwSize)
 {
 	HCRYPTPROV hProv = 0;
 	HCRYPTHASH hHash = 0;
-	string result = string();
+	tstring result;
 	DWORD cbHash = SHA256LEN;
 	BYTE rgbHash[SHA256LEN];
-	CHAR rgbDigits[] = TEXT("0123456789abcdef");
-	char hexbyte[3];
+	TCHAR hexbyte[3];
 	DWORD dwPositionError = 0;
 	int iTypeError = 0;
 	BOOL bResult;
@@ -1712,7 +1772,7 @@ string CalculateDEROIDHash(PBYTE pbSignature, DWORD dwSize)
 
 	bResult = ParseDER(pbSignature, dwSize, hHash, dwPositionError, iTypeError);
 	if (!bResult)
-		result = string(TEXT("!"));
+		result = tstring(TEXT("!"));
 
 	hexbyte[2] = '\0';
 	if (CryptGetHashParam(hHash, HP_HASHVAL, rgbHash, &cbHash, 0))
@@ -1737,21 +1797,21 @@ string CalculateDEROIDHash(PBYTE pbSignature, DWORD dwSize)
 	if (!bResult)
 	{
 		result.append(_TEXT(":"));
-		result.append(std::to_string(iTypeError));
+		result.append(std::to_tstring(iTypeError));
 		result.append(_TEXT(":"));
-		result.append(std::to_string(dwPositionError));
+		result.append(std::to_tstring(dwPositionError));
 	}
 	return result;
 }
 
-BOOL ParsePKCS7DER(PBYTE pbSignature, DWORD dwSize, DWORD& dwPKCS7Size, DWORD& dwBytesAfterPKCS7, DWORD& dwBytesAfterPKCS7NotZero, string& signingtime)
+BOOL ParsePKCS7DER(PBYTE pbSignature, DWORD dwSize, DWORD& dwPKCS7Size, DWORD& dwBytesAfterPKCS7, DWORD& dwBytesAfterPKCS7NotZero, tstring& signingtime)
 {
 	DWORD dwBytesParsed = 0;
 	BYTE abSigningTime[] = { 0x30, 0x1C, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x09, 0x05, 0x31, 0x0F, 0x17, 0x0D };
 	char szSigningTime[0x0D + 1];
 
 	if (NULL == pbSignature)
-			return FALSE;
+		return FALSE;
 	if (!SafeToReadNBytes(dwSize, 0, 2))
 		return FALSE;
 	if (0x30 != pbSignature[0])
@@ -1773,16 +1833,16 @@ BOOL ParsePKCS7DER(PBYTE pbSignature, DWORD dwSize, DWORD& dwPKCS7Size, DWORD& d
 
 	dwBytesAfterPKCS7 = dwSize - dwBytesParsed - dwPKCS7Size;
 	for (DWORD i = 0; i < dwBytesAfterPKCS7; i++)
-	if (0x00 != pbSignature[dwBytesParsed + dwPKCS7Size + i])
-		dwBytesAfterPKCS7NotZero++;
+		if (0x00 != pbSignature[dwBytesParsed + dwPKCS7Size + i])
+			dwBytesAfterPKCS7NotZero++;
 
 	for (DWORD i = 0; i < dwPKCS7Size - sizeof(abSigningTime); i++)
-	if (pbSignature[dwBytesParsed + i] == abSigningTime[0])
-	if (!memcmp(pbSignature + dwBytesParsed + i, abSigningTime, sizeof(abSigningTime)))
-	{
-		strncpy_s(szSigningTime, (char *)(pbSignature + dwBytesParsed + i + sizeof(abSigningTime)), 0x0D);
-		signingtime = string(szSigningTime);
-	}
+		if (pbSignature[dwBytesParsed + i] == abSigningTime[0])
+			if (!memcmp(pbSignature + dwBytesParsed + i, abSigningTime, sizeof(abSigningTime)))
+			{
+				strncpy_s(szSigningTime, (char *)(pbSignature + dwBytesParsed + i + sizeof(abSigningTime)), 0x0D);
+				signingtime = Utf8LPSTR_to_tstring(szSigningTime);
+			}
 
 	return TRUE;
 }
@@ -1798,7 +1858,7 @@ void UnixTimeToFileTime(time_t t, LPFILETIME pft)
 }
 
 // http://support.microsoft.com/kb/90493
-BOOL GetFileInfo(string filename, string& compiletime, string& creationtime, string& lastwritetime, string& lastaccesstime, DWORD& dwFileAttributes, unsigned int& uiCharacteristics, list<string>& sections, unsigned int& uiMagic, unsigned int& uiSubsystem, unsigned int& uiSizeOfCode, unsigned int& uiAddressOfEntryPoint, unsigned int& uiRVA15, string& clrVersion, DWORD& dwSignatureSize1, DWORD& dwSignatureSize2, WORD& wSignatureRevision, WORD& wSignatureCertificateType, DWORD& dwBytesAfterSignature, BOOL& bParsePKCS7DERResult, DWORD& dwPKCS7Size, DWORD& dwBytesAfterPKCS7, DWORD& dwBytesAfterPKCS7NotZero, string& signingtime, DWORD& dwFileSize, string& ownername, string& DEROIDHash, string& error)
+BOOL GetFileInfo(tstring filename, tstring& compiletime, tstring& creationtime, tstring& lastwritetime, tstring& lastaccesstime, DWORD& dwFileAttributes, unsigned int& uiCharacteristics, list<tstring>& sections, unsigned int& uiMagic, unsigned int& uiSubsystem, unsigned int& uiSizeOfCode, unsigned int& uiAddressOfEntryPoint, unsigned int& uiRVA15, tstring& clrVersion, DWORD& dwSignatureSize1, DWORD& dwSignatureSize2, WORD& wSignatureRevision, WORD& wSignatureCertificateType, DWORD& dwBytesAfterSignature, BOOL& bParsePKCS7DERResult, DWORD& dwPKCS7Size, DWORD& dwBytesAfterPKCS7, DWORD& dwBytesAfterPKCS7NotZero, tstring& signingtime, DWORD& dwFileSize, tstring& ownername, tstring& DEROIDHash, tstring& error)
 {
 	HANDLE hFile = NULL;
 	DWORD dwLastError = 0;
@@ -1826,7 +1886,7 @@ BOOL GetFileInfo(string filename, string& compiletime, string& creationtime, str
 	uiSizeOfCode = 0;
 	uiAddressOfEntryPoint = 0;
 	uiRVA15 = 0;
-	clrVersion = "";
+	clrVersion = _T("");
 	dwSignatureSize1 = 0;
 	dwSignatureSize2 = 0;
 	wSignatureRevision = 0;
@@ -1836,11 +1896,11 @@ BOOL GetFileInfo(string filename, string& compiletime, string& creationtime, str
 	dwPKCS7Size = 0;
 	dwBytesAfterPKCS7 = 0;
 	dwBytesAfterPKCS7NotZero = 0;
-	signingtime = "";
+	signingtime = _T("");
 	dwFileSize = 0;
-	compiletime = "";
-	ownername = "";
-	DEROIDHash = "";
+	compiletime = _T("");
+	ownername = _T("");
+	DEROIDHash = _T("");
 
 	hFile = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN | FILE_FLAG_BACKUP_SEMANTICS, NULL);
 
@@ -1940,13 +2000,14 @@ BOOL GetFileInfo(string filename, string& compiletime, string& creationtime, str
 				CHAR szBuffer[17];
 
 				strncpy_s(szBuffer, (CHAR *)clr_metadata.abVersion, 16);
-				clrVersion = string(szBuffer);
+				clrVersion = Utf8LPSTR_to_tstring(szBuffer);
 			}
 		}
 	}
 	if (0 != dwRVASignature)
 		dwBytesAfterSignature = liFileSize.LowPart - dwRVASignature - dwSignatureSize1;
-	if (dwSignatureSize1 > 8)
+	static_assert(8 == offsetof(WIN_CERTIFICATE, bCertificate), "Old code used the hardcoded offset 8");
+	if (dwSignatureSize1 > offsetof(WIN_CERTIFICATE, bCertificate))
 	{
 		pbSignature = (PBYTE) LocalAlloc(LPTR, dwSignatureSize1);
 		if (!pbSignature)
@@ -1963,8 +2024,8 @@ BOOL GetFileInfo(string filename, string& compiletime, string& creationtime, str
 			dwSignatureSize2 = psWC->dwLength;
 			wSignatureRevision = psWC->wRevision;
 			wSignatureCertificateType = psWC->wCertificateType;
-			bParsePKCS7DERResult = ParsePKCS7DER(pbSignature + 8, dwSignatureSize1 - 8, dwPKCS7Size, dwBytesAfterPKCS7, dwBytesAfterPKCS7NotZero, signingtime);
-			DEROIDHash = CalculateDEROIDHash(pbSignature + 8, dwSignatureSize1 - 8 - dwBytesAfterPKCS7);
+			bParsePKCS7DERResult = ParsePKCS7DER(psWC->bCertificate, dwSignatureSize1 - offsetof(WIN_CERTIFICATE, bCertificate), dwPKCS7Size, dwBytesAfterPKCS7, dwBytesAfterPKCS7NotZero, signingtime);
+			DEROIDHash = CalculateDEROIDHash(psWC->bCertificate, dwSignatureSize1 - offsetof(WIN_CERTIFICATE, bCertificate) - dwBytesAfterPKCS7);
 		}
 		LocalFree(pbSignature);
 	}
@@ -1983,7 +2044,7 @@ BOOL GetFileInfo(string filename, string& compiletime, string& creationtime, str
 BOOL IsPEFile(_TCHAR* pszArgument)
 {
 	HANDLE hFile = NULL;
-	string error;
+	tstring error;
 
 	IMAGE_DOS_HEADER image_dos_header;
 	union
@@ -2057,7 +2118,7 @@ PSID ConvertNameToBinarySid(LPTSTR pAccountName)
 		//  ERROR_NONE_MAPPED.
 		if (GetLastError() == ERROR_NONE_MAPPED)
 		{
-			printf_s(_T("LookupAccountName failed with %d\n"), GetLastError());
+			_tprintf_s(_T("LookupAccountName failed with %d\n"), GetLastError());
 			__leave;
 		}
 		else if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
@@ -2065,14 +2126,14 @@ PSID ConvertNameToBinarySid(LPTSTR pAccountName)
 			pSid = (LPTSTR)LocalAlloc(LPTR, dwSidSize * sizeof(TCHAR));
 			if (pSid == NULL)
 			{
-				printf_s(_T("LocalAlloc failed with %d\n"), GetLastError());
+				_tprintf_s(_T("LocalAlloc failed with %d\n"), GetLastError());
 				__leave;
 			}
 
 			pDomainName = (LPTSTR)LocalAlloc(LPTR, dwDomainNameSize * sizeof(TCHAR));
 			if (pDomainName == NULL)
 			{
-				printf_s(_T("LocalAlloc failed with %d\n"), GetLastError());
+				_tprintf_s(_T("LocalAlloc failed with %d\n"), GetLastError());
 				__leave;
 			}
 
@@ -2085,7 +2146,7 @@ PSID ConvertNameToBinarySid(LPTSTR pAccountName)
 				&dwDomainNameSize,
 				&sidType))
 			{
-				printf_s(_T("LookupAccountName failed with %d\n"), GetLastError());
+				_tprintf_s(_T("LookupAccountName failed with %d\n"), GetLastError());
 				__leave;
 			}
 		}
@@ -2093,7 +2154,7 @@ PSID ConvertNameToBinarySid(LPTSTR pAccountName)
 		//  Any other error code
 		else
 		{
-			printf_s(_T("LookupAccountName failed with %d\n"), GetLastError());
+			_tprintf_s(_T("LookupAccountName failed with %d\n"), GetLastError());
 			__leave;
 		}
 
@@ -2123,23 +2184,23 @@ PSID ConvertNameToBinarySid(LPTSTR pAccountName)
 }
 
 
-void DisplayError(char* pszAPI, DWORD dwError)
+void DisplayError(TCHAR* pszAPI, DWORD dwError)
 {
-	LPVOID lpvMessageBuffer;
+	LPTSTR lpvMessageBuffer;
 
 	if (!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_HMODULE | FORMAT_MESSAGE_FROM_SYSTEM,
-		GetModuleHandle("Kernel32.dll"), dwError,
+		GetModuleHandle(TEXT("Kernel32.dll")), dwError,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),  // the user default language
 		(LPTSTR)&lpvMessageBuffer, 0, NULL))
 	{
-		printf_s("FormatMessage failed with %d\n", GetLastError());
+		_tprintf_s(TEXT("FormatMessage failed with %d\n"), GetLastError());
 		ExitProcess(GetLastError());
 	}
 
 	//  ...now display this string.
-	printf_s("ERROR: API        = %s.\n", (char *)pszAPI);
-	printf_s("       error code = %08X.\n", dwError);
-	printf_s("       message    = %s.\n", (char *)lpvMessageBuffer);
+	_tprintf_s(TEXT("ERROR: API        = %s.\n"), pszAPI);
+	_tprintf_s(TEXT("       error code = %08X.\n"), dwError);
+	_tprintf_s(TEXT("       message    = %s.\n"), lpvMessageBuffer);
 
 	//  Free the buffer allocated by the system.
 	LocalFree(lpvMessageBuffer);
@@ -2147,21 +2208,21 @@ void DisplayError(char* pszAPI, DWORD dwError)
 	ExitProcess(GetLastError());
 }
 
-list<string> DisplayAccessMask(ACCESS_MASK Mask)
+list<tstring> DisplayAccessMask(ACCESS_MASK Mask)
 {
-	list<string> text;
+	list<tstring> text;
 
 	if (((Mask & GENERIC_ALL) == GENERIC_ALL) || ((Mask & FILE_ALL_ACCESS) == FILE_ALL_ACCESS))
 	{
-		text.push_back("Full Control");
+		text.push_back(TEXT("Full Control"));
 		return text;
 	}
 	if (((Mask & GENERIC_READ) == GENERIC_READ) || ((Mask & FILE_GENERIC_READ) == FILE_GENERIC_READ))
-		text.push_back("Generic Read");
+		text.push_back(TEXT("Generic Read"));
 	if (((Mask & GENERIC_WRITE) == GENERIC_WRITE) || ((Mask & FILE_GENERIC_WRITE) == FILE_GENERIC_WRITE))
-		text.push_back("Generic Write");
+		text.push_back(TEXT("Generic Write"));
 	if (((Mask & GENERIC_EXECUTE) == GENERIC_EXECUTE) || ((Mask & FILE_GENERIC_EXECUTE) == FILE_GENERIC_EXECUTE))
-		text.push_back("Generic Execute");
+		text.push_back(TEXT("Generic Execute"));
 	return text;
 }
 
@@ -2194,7 +2255,7 @@ DWORD GetAccess(AUTHZ_CLIENT_CONTEXT_HANDLE hAuthzClient, PSECURITY_DESCRIPTOR p
 		0,
 		&AccessReply,
 		NULL)) {
-		printf_s(_T("AuthzAccessCheck failed with %d\n"), GetLastError());
+		_tprintf_s(_T("AuthzAccessCheck failed with %d\n"), GetLastError());
 	}
 
 	return *(PACCESS_MASK)(AccessReply.GrantedAccessMask);
@@ -2227,7 +2288,7 @@ DWORD GetEffectiveRightsForUser(AUTHZ_RESOURCE_MANAGER_HANDLE hManager,
 			AuthzFreeContext(hAuthzClientContext);
 		}
 		else
-			printf_s(_T("AuthzInitializeContextFromSid failed with %d\n"), GetLastError());
+			_tprintf_s(_T("AuthzInitializeContextFromSid failed with %d\n"), GetLastError());
 	}
 	if (pSid != NULL)
 	{
@@ -2252,12 +2313,12 @@ DWORD UseAuthzSolution(PSECURITY_DESCRIPTOR psd, LPTSTR lpszUserName)
 		AuthzFreeResourceManager(hManager);
 	}
 	else
-		printf_s(_T("AuthzInitializeResourceManager failed with %d\n"), GetLastError());
+		_tprintf_s(_T("AuthzInitializeResourceManager failed with %d\n"), GetLastError());
 
 	return am1;
 }
 
-BOOL GetFileSecurityInfo(string filename, LPTSTR pszUser, ACCESS_MASK& am)
+BOOL GetFileSecurityInfo(tstring filename, LPTSTR pszUser, ACCESS_MASK& am)
 {
 	PACL                 pacl;
 	PSECURITY_DESCRIPTOR psd;
@@ -2283,13 +2344,13 @@ BOOL GetFileSecurityInfo(string filename, LPTSTR pszUser, ACCESS_MASK& am)
 }
 
 #define MAX_NAME 256
-BOOL GetLogonFromToken(HANDLE hToken, string& user, string& domain)
+BOOL GetLogonFromToken(HANDLE hToken, tstring& user, tstring& domain)
 {
 	DWORD dwSize = MAX_NAME;
 	BOOL bSuccess = FALSE;
 	DWORD dwLength = 0;
-	user = string("");
-	domain = string("");
+	user = _T("");
+	domain = _T("");
 	PTOKEN_USER ptu = NULL;
 	//Verify the parameter passed in is not NULL.
 	if (NULL == hToken)
@@ -2324,13 +2385,13 @@ BOOL GetLogonFromToken(HANDLE hToken, string& user, string& domain)
 		goto Cleanup;
 	}
 	SID_NAME_USE SidType;
-	char lpName[MAX_NAME];
-	char lpDomain[MAX_NAME];
+	TCHAR lpName[MAX_NAME];
+	TCHAR lpDomain[MAX_NAME];
 
 	if (LookupAccountSid(NULL, ptu->User.Sid, lpName, &dwSize, lpDomain, &dwSize, &SidType))
 	{
-		user = string(lpName);
-		domain = string(lpDomain);
+		user = lpName;
+		domain = lpDomain;
 		bSuccess = TRUE;
 	}
 
@@ -2341,7 +2402,7 @@ Cleanup:
 	return bSuccess;
 }
 
-BOOL GetUserFromProcess(const DWORD procId, string& user, string& domain)
+BOOL GetUserFromProcess(const DWORD procId, tstring& user, tstring& domain)
 {
 	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, procId);
 	if (hProcess == NULL)
