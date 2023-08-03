@@ -319,7 +319,7 @@ void AnalyzePEFile(string filename, _TCHAR* pszCatalogFile, ostream& output, BOO
 			output << XMLElementSingleLine(4, _TEXT("characteristicsDecode"), DecodeCharacteristics(uiCharacteristics)) << endl;
 			output << _TEXT("    <magic>") << uiMagic << _TEXT("</magic>") << endl;
 			output << _TEXT("    <magicDecode>") << DecodeMagic(uiMagic) << _TEXT("</magicDecode>") << endl;
-			output << _TEXT("    <subsystem>") << uiSubsystem << _TEXT("</susbsystem>") << endl;
+			output << _TEXT("    <subsystem>") << uiSubsystem << _TEXT("</subsystem>") << endl;
 			output << _TEXT("    <sizeOfCode>") << std::dec << uiSizeOfCode << std::hex << _TEXT("</sizeOfCode>") << endl;
 			output << _TEXT("    <addressOfEntryPoint>") << uiAddressOfEntryPoint << _TEXT("</addressOfEntryPoint>") << endl;
 			output << XMLElementSingleLine(4, _TEXT("compiletime"), compiletime) << endl;
